@@ -1231,6 +1231,8 @@ function showAdventureStep() {
 // ═══ STAGE 6: GAME ═══
 let gameScore = 0; const GAME_TARGET = 8;
 let gameActive = false, basketX = 0, gameInterval, spawnInterval;
+const kittenMew = new Audio('wiwiwi-kitten.mp3');
+kittenMew.volume = 0.5;
 function startGame() {
   gameScore = 0; gameActive = true; updateGameScore();
   const area = $('gameArea'), basket = $('basket');
@@ -1264,7 +1266,9 @@ function checkCollisions() {
     const r = item.getBoundingClientRect();
     const cx = r.left + r.width/2, cy = r.top + r.height/2;
     if (cx > bRect.left-10 && cx < bRect.right+10 && cy > bRect.top-5 && cy < bRect.bottom+10) {
-      item.remove(); gameScore++; sfx('catch'); updateGameScore();
+      item.remove(); gameScore++; sfx('catch');
+      kittenMew.currentTime = 0; kittenMew.play().catch(()=>{});
+      updateGameScore();
       const flash = document.createElement('div'); flash.className = 'catch-flash';
       $('gameArea').appendChild(flash); setTimeout(() => flash.remove(), 400);
       if (gameScore >= GAME_TARGET) {
