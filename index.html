@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>For Maria</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Quicksand:wght@400;500;600;700&family=Homemade+Apple&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --pink-light: #ffe4ec; --pink: #ff8fab; --pink-deep: #ff6b8a;
+  --rose: #e84876; --lavender: #e8d5f5; --cream: #fff5f7;
+  --coral: #ff7eb3; --gold: #ffd700; --blush: #ffb3c6;
+  --night: #1a1030; --night-purple: #2d1b4e;
+}
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Quicksand', sans-serif; background: var(--cream);
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+
+/* ═══ SVG HEART SHAPE ═══ */
+.svg-heart {
+  display: inline-block;
+}
+.svg-heart svg { display: block; }
+
+/* ═══ FLOATING PARTICLES ═══ */
+.hearts-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.floating-heart {
+  position: absolute; bottom: -40px;
+  animation: floatUp linear infinite; opacity: 0.18;
+}
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0; }
+  10% { opacity: 0.18; } 90% { opacity: 0.18; }
+  100% { transform: translateY(-110vh) rotate(360deg) scale(0.5); opacity: 0; }
+}
+.sparkle {
+  position: fixed; width: 3px; height: 3px; border-radius: 50%;
+  pointer-events: none; z-index: 1;
+  background: var(--gold);
+  animation: sparkleAnim 2s ease-in-out infinite;
+  box-shadow: 0 0 4px var(--gold);
+}
+@keyframes sparkleAnim {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 0.7; transform: scale(1); }
+}
+
+/* ═══ STAGE SYSTEM ═══ */
+.stage {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 10; padding: 20px;
+  opacity: 0; transform: scale(0.95);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  pointer-events: none;
+  overflow-y: auto; overflow-x: hidden;
+}
+.stage.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+
+/* ═══ PROGRESS BAR ═══ */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 3px; z-index: 200;
+  background: rgba(255,182,203,0.2);
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink), var(--rose), var(--coral));
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(232,72,118,0.4);
+}
+
+/* ═══ BUTTONS ═══ */
+.btn-primary {
+  font-family: 'Quicksand', sans-serif;
+  font-size: clamp(15px, 3.8vw, 19px);
+  font-weight: 600; color: white;
+  background: linear-gradient(135deg, var(--pink) 0%, var(--rose) 100%);
+  border: none; padding: 13px 34px;
+  border-radius: 50px; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(232,72,118,0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative; overflow: hidden;
+  letter-spacing: 0.3px;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(232,72,118,0.35); }
+.btn-primary:active { transform: translateY(1px) scale(0.98); }
+.btn-primary::after {
+  content: ''; position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(transparent, rgba(255,255,255,0.08), transparent);
+  transform: rotate(45deg); animation: shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-100%) rotate(45deg); }
+  50% { transform: translateX(100%) rotate(45deg); }
+}
+
+.fade-in { opacity: 0; animation: fadeInUp 0.8s ease forwards; }
+.fade-in-d1 { animation-delay: 0.3s; }
+.fade-in-d2 { animation-delay: 0.6s; }
+.fade-in-d3 { animation-delay: 0.9s; }
+.fade-in-d4 { animation-delay: 1.2s; }
+.fade-in-d5 { animation-delay: 1.5s; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ SVG CAT COMPONENT ═══ */
+.cat-illust { display: inline-block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.08)); }
+
+/* ═══ STAGE 1 ═══ */
+#stage1 { background: linear-gradient(160deg, #fff0f3 0%, #ffe4ec 40%, #ffd6e0 100%); }
+.hoshi-scene { text-align: center; }
+.envelope {
+  width: 120px; height: 80px; margin: 0 auto 10px;
+  position: relative; cursor: pointer; transition: transform 0.3s;
+}
+.envelope:hover { transform: scale(1.05); }
+.envelope-body {
+  width: 120px; height: 80px;
+  background: linear-gradient(135deg, #fff0f0, #ffe0e8);
+  border: 2px solid var(--blush); border-radius: 4px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(232,72,118,0.12);
+}
+.envelope-flap {
+  position: absolute; top: -1px; left: -1px;
+  width: 0; height: 0;
+  border-left: 61px solid transparent; border-right: 61px solid transparent;
+  border-top: 45px solid var(--blush);
+  transition: transform 0.6s ease; transform-origin: top center; z-index: 3;
+}
+.envelope-flap-inner {
+  position: absolute; top: -44px; left: -59px;
+  width: 0; height: 0;
+  border-left: 59px solid transparent; border-right: 59px solid transparent;
+  border-top: 43px solid #fff0f0;
+}
+.envelope.open .envelope-flap { transform: rotateX(180deg); }
+.envelope-seal {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); z-index: 2;
+}
+.letter-preview {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  background: white; padding: 6px 12px; border-radius: 3px;
+  font-family: 'Caveat', cursive; font-size: 11px; color: var(--rose);
+  white-space: nowrap; opacity: 0; transition: all 0.5s ease; z-index: 4;
+}
+.envelope.open .letter-preview { opacity: 1; top: -40px; }
+.intro-title {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(32px, 8vw, 54px); color: var(--rose);
+  text-shadow: 0 2px 15px rgba(232,72,118,0.12); line-height: 1.2;
+}
+.intro-sub { font-size: clamp(14px, 3.5vw, 18px); color: #c4748f; margin-top: 8px; }
+.hoshi-label {
+  font-family: 'Caveat', cursive; font-size: 16px; color: var(--pink-deep); margin-top: 8px;
+}
+
+/* ═══ STAGE 2: LETTER ═══ */
+#stage2 {
+  background: linear-gradient(160deg, #fef9f0 0%, #fdf0e8 40%, #fce8e0 100%);
+  justify-content: flex-start;
+  padding-top: 40px; padding-bottom: 30px;
+}
+.letter-container {
+  background: white; border-radius: 12px;
+  padding: clamp(24px, 5vw, 40px);
+  max-width: 500px; width: 90%;
+  box-shadow: 0 8px 35px rgba(232,72,118,0.08), 0 1px 3px rgba(0,0,0,0.04);
+  position: relative; border: 1px solid rgba(255,182,203,0.15);
+  flex-shrink: 0;
+}
+.letter-container::before {
+  content: ''; position: absolute; top: 0; left: 30px; right: 30px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--pink), var(--rose), var(--pink), transparent);
+}
+.letter-date {
+  font-family: 'Quicksand', sans-serif; font-size: 12px;
+  color: #c4748f; text-align: right; margin-bottom: 15px;
+}
+.letter-body {
+  font-family: 'Homemade Apple', cursive;
+  font-size: clamp(13px, 3vw, 16px); color: #4a3040;
+  line-height: 2; min-height: 200px;
+}
+.letter-body .word { display: inline; opacity: 0; animation: wordAppear 0.1s ease forwards; }
+@keyframes wordAppear { to { opacity: 1; } }
+.letter-signature {
+  font-family: 'Caveat', cursive; font-size: 22px; color: var(--rose);
+  text-align: right; margin-top: 20px; opacity: 0;
+}
+.letter-next-btn { margin-top: 25px; margin-bottom: 20px; opacity: 0; flex-shrink: 0; }
+
+/* ═══ STAGE 3: SCRATCH ═══ */
+#stage3 { background: linear-gradient(160deg, #fff0f5 0%, #ffe0ee 50%, #ffd4e8 100%); }
+.scratch-title { font-family: 'Caveat', cursive; font-size: clamp(24px, 6vw, 36px); color: var(--rose); margin-bottom: 5px; }
+.scratch-sub { font-size: 14px; color: #c4748f; margin-bottom: 20px; }
+.scratch-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 380px; width: 90%; }
+.scratch-card {
+  position: relative; height: clamp(100px, 20vw, 130px); border-radius: 16px;
+  overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.scratch-content {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 12px;
+  font-family: 'Caveat', cursive; font-size: clamp(14px, 3vw, 17px); color: var(--rose);
+  background: linear-gradient(135deg, #fff5f7, #ffe8ef);
+  border: 1.5px solid rgba(255,182,203,0.25); border-radius: 16px; line-height: 1.3;
+}
+.scratch-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--pink), var(--rose));
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  font-family: 'Quicksand', sans-serif; color: white; font-weight: 600; font-size: 13px;
+  border-radius: 16px; transition: opacity 0.5s; z-index: 2;
+}
+.scratch-overlay .scratch-icon { margin-bottom: 4px; }
+.scratch-overlay.revealed { opacity: 0; pointer-events: none; }
+.scratch-counter { font-size: 13px; color: #c4748f; margin-top: 15px; }
+.scratch-next-btn { margin-top: 15px; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+.scratch-next-btn.show { opacity: 1; pointer-events: auto; }
+
+/* ═══ STAGE 4: PUZZLE ═══ */
+#stage4 { background: linear-gradient(160deg, #f0f0ff 0%, #e8e0f5 40%, #f5e0f0 100%); }
+.puzzle-title { font-family: 'Caveat', cursive; font-size: clamp(24px, 6vw, 36px); color: #7b3fa0; margin-bottom: 5px; }
+.puzzle-sub { font-size: 14px; color: #9b6fb5; margin-bottom: 15px; }
+.puzzle-wrapper { position: relative; }
+.puzzle-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr);
+  gap: 3px; width: min(340px, 85vw); aspect-ratio: 4/3;
+  background: rgba(123,63,160,0.1); border-radius: 12px; padding: 3px;
+  box-shadow: 0 4px 20px rgba(123,63,160,0.12);
+}
+.puzzle-tile {
+  background-size: calc(400%) calc(300%);
+  border-radius: 6px; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.puzzle-tile:hover { transform: scale(1.03); box-shadow: 0 3px 10px rgba(123,63,160,0.2); }
+.puzzle-tile.empty { background: none !important; box-shadow: none; cursor: default; opacity: 0; }
+.puzzle-tile.correct { box-shadow: 0 0 0 2px rgba(102,187,106,0.5); }
+.puzzle-moves { font-size: 14px; color: #9b6fb5; margin-top: 12px; }
+.puzzle-complete {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(8px);
+  border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity 0.6s;
+}
+.puzzle-complete.show { opacity: 1; pointer-events: auto; }
+.puzzle-complete-text {
+  font-family: 'Caveat', cursive; font-size: clamp(22px, 5vw, 30px); color: #7b3fa0; margin-bottom: 15px;
+}
+.puzzle-reveal {
+  width: min(340px, 85vw); aspect-ratio: 4/3; border-radius: 12px;
+  background-size: cover; background-position: center;
+  box-shadow: 0 8px 30px rgba(123,63,160,0.15);
+  opacity: 0; transition: opacity 0.8s; margin-top: 10px;
+  border: 3px solid white;
+}
+.puzzle-reveal.show { opacity: 1; }
+.puzzle-next-btn { margin-top: 18px; opacity: 0; transition: opacity 0.5s; }
+.puzzle-next-btn.show { opacity: 1; }
+.puzzle-freepass {
+  margin-top: 12px; opacity: 0; transition: opacity 0.6s; pointer-events: none;
+  text-align: center;
+}
+.puzzle-freepass.show { opacity: 1; pointer-events: auto; }
+.puzzle-freepass-text {
+  font-family: 'Caveat', cursive; font-size: clamp(14px, 3.5vw, 17px);
+  color: #9b6fb5; margin-bottom: 8px; line-height: 1.4;
+}
+.puzzle-freepass-btn {
+  font-family: 'Quicksand', sans-serif; font-size: 13px; font-weight: 600;
+  color: #9b6fb5; background: rgba(232,208,255,0.2);
+  border: 1.5px solid rgba(123,63,160,0.2); padding: 8px 20px;
+  border-radius: 50px; cursor: pointer; transition: all 0.3s;
+}
+.puzzle-freepass-btn:hover { background: rgba(232,208,255,0.4); transform: scale(1.05); }
+
+/* ═══ STAGE 5: ADVENTURE ═══ */
+#stage5 { background: linear-gradient(160deg, var(--night) 0%, var(--night-purple) 50%, #3d2560 100%); }
+.adventure-container { max-width: 460px; width: 90%; text-align: center; }
+.adventure-scene { position: relative; min-height: 140px; margin-bottom: 15px; }
+.adventure-illustration { margin-bottom: 10px; min-height: 100px; display:flex; align-items:center; justify-content:center; }
+.stars-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.star {
+  position: absolute; width: 2px; height: 2px;
+  background: white; border-radius: 50%;
+  animation: twinkle 2s ease-in-out infinite;
+}
+@keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+.adventure-text {
+  font-family: 'Caveat', cursive; font-size: clamp(18px, 4.5vw, 24px);
+  color: #e8d0ff; line-height: 1.5; margin-bottom: 20px; min-height: 80px;
+}
+.adventure-choices { display: flex; flex-direction: column; gap: 10px; }
+.adventure-choice {
+  font-family: 'Quicksand', sans-serif; font-size: clamp(14px, 3.5vw, 16px);
+  font-weight: 500; padding: 14px 20px; border-radius: 14px;
+  border: 1.5px solid rgba(232,208,255,0.25); background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px); cursor: pointer; transition: all 0.3s; color: #e8d0ff;
+}
+.adventure-choice:hover { border-color: var(--coral); background: rgba(255,255,255,0.12); transform: translateX(5px); }
+
+/* ═══ STAGE 6: GAME ═══ */
+#stage6 { background: linear-gradient(160deg, #fff0f6 0%, #ffe0ee 50%, #ffd4e8 100%); }
+.game-area {
+  position: relative; width: min(380px, 90vw); height: min(460px, 60vh);
+  background: rgba(255,255,255,0.2); border-radius: 24px;
+  border: 1.5px solid rgba(255,182,203,0.3);
+  overflow: hidden; touch-action: none; backdrop-filter: blur(10px);
+}
+.game-title { font-family: 'Caveat', cursive; font-size: clamp(22px, 5vw, 30px); color: var(--rose); }
+.game-score { font-size: clamp(14px, 3vw, 18px); color: var(--pink-deep); font-weight: 600; margin: 5px 0; display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+.game-instruction { font-size: 13px; color: #c4748f; margin-bottom: 10px; }
+.score-heart { width: 18px; height: 18px; transition: opacity 0.3s; }
+.score-heart.empty { opacity: 0.2; }
+
+.basket {
+  position: absolute; bottom: 10px; width: 80px; height: 60px;
+  transform: translateX(-50%); transition: left 0.05s linear; z-index: 5;
+}
+.basket-bowl {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 70px; height: 30px;
+  background: linear-gradient(180deg, #f0c8a0, #e0a878);
+  border-radius: 0 0 35px 35px; border: 2px solid #d4956a; border-top: none;
+}
+.basket-kitten-head {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 50px; height: 40px; background: #f0e6e0; border-radius: 50% 50% 45% 45%;
+}
+.bk-ear { position: absolute; top: -8px; width: 16px; height: 18px; background: #f0e6e0; }
+.bk-ear-l { left: 4px; border-radius: 50% 50% 0 50%; transform: rotate(-15deg); }
+.bk-ear-r { right: 4px; border-radius: 50% 50% 50% 0; transform: rotate(15deg); }
+.bk-eyes { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
+.bk-eye { width: 7px; height: 7px; background: #3a2a1a; border-radius: 50%; animation: blink 3s ease-in-out infinite; }
+@keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+.bk-nose { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); width: 5px; height: 4px; background: #ffaaaa; border-radius: 50%; }
+
+.falling-item {
+  position: absolute; top: -40px; animation: heartFall linear forwards; z-index: 2;
+}
+@keyframes heartFall { to { top: 110%; } }
+.catch-flash {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(255,182,203,0.25), transparent 70%);
+  pointer-events: none; animation: catchFlash 0.4s ease-out;
+}
+@keyframes catchFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ═══ STAGE 7: PROPOSAL ═══ */
+#stage7 { background: linear-gradient(160deg, #fff5f7 0%, #ffe8ef 30%, #ffdce6 60%, #ffd0de 100%); }
+.proposal-cats { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+.proposal-text {
+  font-family: 'Caveat', cursive; font-size: clamp(34px, 9vw, 60px);
+  color: var(--rose); text-align: center; line-height: 1.3;
+  text-shadow: 0 3px 15px rgba(232,72,118,0.12);
+}
+.proposal-buttons { display: flex; gap: 20px; align-items: center; margin-top: 30px; flex-wrap: wrap; justify-content: center; }
+.yes-btn {
+  font-family: 'Quicksand', sans-serif; font-size: clamp(20px, 5vw, 28px);
+  font-weight: 700; color: white;
+  background: linear-gradient(135deg, var(--pink) 0%, var(--rose) 50%, #d63384 100%);
+  border: none; padding: 16px 48px; border-radius: 50px; cursor: pointer;
+  box-shadow: 0 6px 25px rgba(232,72,118,0.3);
+  transition: transform 0.2s; animation: yesPulse 2s ease-in-out infinite;
+}
+@keyframes yesPulse {
+  0%, 100% { box-shadow: 0 6px 25px rgba(232,72,118,0.3), 0 0 0 0 rgba(232,72,118,0.3); }
+  50% { box-shadow: 0 6px 25px rgba(232,72,118,0.3), 0 0 0 10px rgba(232,72,118,0); }
+}
+.yes-btn:hover { transform: scale(1.08); }
+.no-btn {
+  font-family: 'Quicksand', sans-serif; font-size: 14px; font-weight: 500;
+  color: #c4748f; background: rgba(255,255,255,0.4);
+  border: 1.5px solid rgba(196,116,143,0.2); padding: 8px 20px;
+  border-radius: 50px; cursor: pointer; transition: all 0.3s ease;
+}
+.no-btn.dodge { position: fixed !important; z-index: 999; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.no-btn.shrinking { font-size: 11px; padding: 5px 12px; }
+.no-btn.tiny { font-size: 8px; padding: 3px 8px; opacity: 0.5; }
+.no-btn.gone { opacity: 0; transform: scale(0) rotate(720deg); pointer-events: none; }
+
+/* ═══ STAGE 8: CELEBRATION ═══ */
+#stage8 { background: linear-gradient(160deg, #fff0f5 0%, #ffe0ee 30%, #ffd4e8 60%, #ffc8e0 100%); }
+.celeb-big-heart { opacity: 0; animation: bigHeartBeat 1s ease forwards 0.3s; }
+@keyframes bigHeartBeat {
+  0% { opacity: 0; transform: scale(0) rotate(-20deg); }
+  50% { transform: scale(1.3) rotate(5deg); }
+  70% { transform: scale(0.9) rotate(-2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+.celeb-heart-anim { animation: heartBeat 1s ease-in-out infinite 1.3s; }
+@keyframes heartBeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.15); } 30% { transform: scale(1); } 45% { transform: scale(1.1); } }
+.celeb-text {
+  font-family: 'Caveat', cursive; font-size: clamp(28px, 7vw, 48px);
+  color: var(--rose); text-align: center;
+  opacity: 0; animation: celebReveal 1s ease forwards 0.8s;
+}
+.celeb-sub {
+  font-size: clamp(16px, 4vw, 22px); color: #c4748f; text-align: center;
+  opacity: 0; animation: celebReveal 1s ease forwards 1.3s; margin-top: 8px;
+}
+.celeb-tbarakellah {
+  font-family: 'Caveat', cursive; font-size: clamp(22px, 5vw, 32px); color: var(--coral);
+  opacity: 0; animation: celebReveal 1s ease forwards 1.8s; margin-top: 15px;
+}
+@keyframes celebReveal {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.celeb-kittens {
+  display: flex; gap: 12px; align-items: flex-end; margin-top: 20px;
+  opacity: 0; animation: fadeInUp 1s ease forwards 2.2s;
+}
+.celeb-kitten-label {
+  font-family: 'Caveat', cursive; font-size: 14px; color: var(--rose);
+  text-align: center; margin-top: 5px;
+}
+.celeb-future {
+  font-family: 'Quicksand', sans-serif; font-size: clamp(13px, 3vw, 15px);
+  color: #c4748f; text-align: center; max-width: 340px;
+  opacity: 0; animation: fadeInUp 1s ease forwards 2.8s;
+  margin-top: 18px; line-height: 1.7;
+}
+
+/* Confetti & explosion */
+.confetti-piece { position: fixed; z-index: 100; pointer-events: none; animation: confettiFall linear forwards; }
+@keyframes confettiFall { 0% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; transform: translateY(110vh) rotate(720deg); } }
+.heart-explosion { position: fixed; z-index: 100; pointer-events: none; animation: explodeHeart 1.5s ease-out forwards; }
+@keyframes explodeHeart {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+}
+
+/* ═══ ANIMATED DECORATIONS ═══ */
+.floating-paw {
+  position: fixed; pointer-events: none; z-index: 1;
+  animation: pawFloat 8s ease-in-out infinite;
+  opacity: 0.08;
+}
+@keyframes pawFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-15px) rotate(10deg); }
+  75% { transform: translateY(10px) rotate(-10deg); }
+}
+.deco-cat-walking {
+  position: fixed; bottom: -5px; z-index: 2; pointer-events: none;
+  animation: catWalk 20s linear infinite;
+  opacity: 0.12;
+}
+@keyframes catWalk {
+  0% { left: -80px; transform: scaleX(1); }
+  49% { transform: scaleX(1); }
+  50% { left: calc(100vw + 80px); transform: scaleX(-1); }
+  99% { transform: scaleX(-1); }
+  100% { left: -80px; transform: scaleX(1); }
+}
+.deco-heart-orbit {
+  position: fixed; pointer-events: none; z-index: 1;
+  animation: orbitSpin 6s linear infinite;
+}
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+.orbit-heart {
+  position: absolute; animation: orbitPulse 2s ease-in-out infinite;
+}
+@keyframes orbitPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+.paw-trail {
+  position: fixed; pointer-events: none; z-index: 1;
+  opacity: 0; animation: pawTrailAnim 3s ease-out forwards;
+}
+@keyframes pawTrailAnim {
+  0% { opacity: 0.5; transform: scale(0.5) rotate(var(--rot)); }
+  100% { opacity: 0; transform: scale(1) rotate(var(--rot)) translateY(-30px); }
+}
+.stage-deco-corner {
+  position: absolute; pointer-events: none; z-index: 0;
+}
+.stage-deco-corner.top-left { top: 15px; left: 15px; opacity: 0.15; animation: gentleBob 4s ease-in-out infinite; }
+.stage-deco-corner.top-right { top: 15px; right: 15px; opacity: 0.12; animation: gentleBob 4s ease-in-out infinite 1s; }
+.stage-deco-corner.bottom-left { bottom: 15px; left: 15px; opacity: 0.1; animation: gentleBob 4s ease-in-out infinite 2s; }
+.stage-deco-corner.bottom-right { bottom: 15px; right: 15px; opacity: 0.13; animation: gentleBob 4s ease-in-out infinite 0.5s; }
+@keyframes gentleBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+.hoshi-tail {
+  position: absolute; width: 4px; height: 30px; background: #f0e6e0;
+  border-radius: 4px; bottom: -5px; right: -8px;
+  transform-origin: top center; animation: tailWag 0.8s ease-in-out infinite;
+}
+@keyframes tailWag {
+  0%, 100% { transform: rotate(-15deg); }
+  50% { transform: rotate(15deg); }
+}
+.hoshi-wrapper { position: relative; display: inline-block; }
+.purr-lines {
+  position: absolute; top: 8px; right: -20px; opacity: 0;
+  animation: purrAnim 2s ease-in-out infinite 1s;
+}
+@keyframes purrAnim {
+  0%, 100% { opacity: 0; transform: translateX(0); }
+  30% { opacity: 0.6; }
+  70% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateX(5px); }
+}
+
+/* ═══ MUSIC TOGGLE ═══ */
+.music-toggle {
+  position: fixed; bottom: 15px; right: 15px; z-index: 300;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.5); backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,182,203,0.3);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s; box-shadow: 0 2px 10px rgba(232,72,118,0.1);
+}
+.music-toggle:hover { transform: scale(1.1); background: rgba(255,255,255,0.7); }
+.music-toggle svg { transition: opacity 0.3s; }
+.music-toggle.muted svg .bar1,
+.music-toggle.muted svg .bar2,
+.music-toggle.muted svg .bar3 { animation: none !important; opacity: 0.25; }
+.music-bars { display: flex; gap: 2px; align-items: flex-end; height: 16px; }
+.music-bars .bar {
+  width: 3px; border-radius: 1.5px; background: var(--rose);
+  animation: musicBar 1s ease-in-out infinite;
+}
+.bar1 { height: 8px; animation-delay: 0s !important; }
+.bar2 { height: 14px; animation-delay: 0.2s !important; }
+.bar3 { height: 10px; animation-delay: 0.4s !important; }
+@keyframes musicBar {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+
+/* Loading */
+#loading {
+  position: fixed; inset: 0;
+  background: linear-gradient(160deg, #fff5f7, #ffe4ec);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1000; transition: opacity 0.8s;
+}
+#loading.hidden { opacity: 0; pointer-events: none; }
+.loading-anim { animation: loadBounce 1.2s ease-in-out infinite; }
+@keyframes loadBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.loading-text { font-family: 'Caveat', cursive; font-size: 20px; color: var(--rose); margin-top: 15px; }
+</style>
+</head>
+<body>
+
+<!-- SVG Definitions (reusable) -->
+<svg style="position:absolute;width:0;height:0">
+<defs>
+  <!-- Heart shape -->
+  <path id="heartPath" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+  <!-- Paw shape -->
+  <g id="pawShape">
+    <ellipse cx="12" cy="17" rx="5" ry="4"/>
+    <circle cx="7" cy="11" r="2.5"/>
+    <circle cx="12" cy="9" r="2.5"/>
+    <circle cx="17" cy="11" r="2.5"/>
+  </g>
+  <!-- Cat face -->
+  <g id="catFace">
+    <path d="M6 16 Q12 20 18 16 Q20 10 18 4 L14 8 L10 8 L6 4 Q4 10 6 16Z" fill="currentColor" stroke="none"/>
+    <circle cx="10" cy="11" r="1.2" fill="#3a2a1a"/>
+    <circle cx="14" cy="11" r="1.2" fill="#3a2a1a"/>
+    <ellipse cx="12" cy="13" rx="1" ry="0.6" fill="#ffaaaa"/>
+    <circle cx="10.4" cy="10.5" r="0.4" fill="white"/>
+    <circle cx="14.4" cy="10.5" r="0.4" fill="white"/>
+    <path d="M3 12 L7 11" stroke="#d4a88a" stroke-width="0.5" fill="none"/>
+    <path d="M3 13.5 L7 13" stroke="#d4a88a" stroke-width="0.5" fill="none"/>
+    <path d="M21 12 L17 11" stroke="#d4a88a" stroke-width="0.5" fill="none"/>
+    <path d="M21 13.5 L17 13" stroke="#d4a88a" stroke-width="0.5" fill="none"/>
+  </g>
+</defs>
+</svg>
+
+<div id="loading">
+  <div class="loading-anim">
+    <svg width="60" height="55" viewBox="0 0 24 24"><use href="#catFace" style="color:#f0e6e0"/></svg>
+  </div>
+  <div class="loading-text">Hoshi is preparing something special...</div>
+</div>
+
+<div class="music-toggle muted" id="musicToggle" title="Toggle music">
+  <div class="music-bars">
+    <div class="bar bar1"></div>
+    <div class="bar bar2"></div>
+    <div class="bar bar3"></div>
+  </div>
+</div>
+<div class="hearts-bg" id="heartsBg"></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<!-- STAGE 1 -->
+<div class="stage active" id="stage1">
+  <div class="hoshi-scene">
+    <div class="fade-in hoshi-wrapper" style="margin-bottom:10px;">
+      <svg width="80" height="74" viewBox="0 0 24 24"><use href="#catFace" style="color:#f0e6e0"/></svg>
+      <div class="hoshi-tail"></div>
+      <div class="purr-lines">
+        <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+          <path d="M2 4 Q8 2 6 8" stroke="var(--pink)" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <path d="M4 8 Q10 6 8 14" stroke="var(--pink)" stroke-width="1.5" fill="none" opacity="0.4"/>
+          <path d="M0 12 Q6 10 4 18" stroke="var(--pink)" stroke-width="1.5" fill="none" opacity="0.3"/>
+        </svg>
+      </div>
+    </div>
+    <div class="hoshi-label fade-in fade-in-d1">~ Hoshi has a delivery for you ~</div>
+    <div style="height:18px"></div>
+    <div class="envelope fade-in fade-in-d2" id="envelope">
+      <div class="envelope-body">
+        <div class="envelope-flap"><div class="envelope-flap-inner"></div></div>
+        <div class="envelope-seal">
+          <svg width="28" height="28" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="var(--rose)" opacity="0.8"/></svg>
+        </div>
+      </div>
+      <div class="letter-preview">For my Maria...</div>
+    </div>
+    <div style="height:22px"></div>
+    <div class="intro-title fade-in fade-in-d3">Hey Maria...</div>
+    <div class="intro-sub fade-in fade-in-d4">I made something just for you, chaton</div>
+    <div style="height:22px"></div>
+    <button class="btn-primary fade-in fade-in-d5" id="startBtn">Open the envelope</button>
+  </div>
+</div>
+
+<!-- STAGE 2: Love Letter -->
+<div class="stage" id="stage2">
+  <div class="letter-container">
+    <div class="letter-date">February 14th, 2026</div>
+    <div class="letter-body" id="letterBody"></div>
+    <div class="letter-signature" id="letterSig">Forever your chaton,<br>Nassime</div>
+  </div>
+  <button class="btn-primary letter-next-btn" id="letterNextBtn">Continue</button>
+</div>
+
+<!-- STAGE 3: Scratch Cards -->
+<div class="stage" id="stage3">
+  <div class="scratch-title fade-in">Reasons I love you</div>
+  <div class="scratch-sub fade-in fade-in-d1">Tap each card to reveal</div>
+  <div class="scratch-grid" id="scratchGrid"></div>
+  <div class="scratch-counter" id="scratchCounter"></div>
+  <button class="btn-primary scratch-next-btn" id="scratchNextBtn">Keep going</button>
+</div>
+
+<!-- STAGE 4: Puzzle -->
+<div class="stage" id="stage4">
+  <div class="puzzle-title fade-in">Piece us together</div>
+  <div class="puzzle-sub fade-in fade-in-d1">Solve the puzzle to reveal a memory</div>
+  <div class="puzzle-wrapper">
+    <div class="puzzle-grid" id="puzzleGrid"></div>
+    <div class="puzzle-complete" id="puzzleComplete">
+      <div class="puzzle-complete-text">You found us!</div>
+    </div>
+  </div>
+  <div class="puzzle-reveal" id="puzzleReveal"></div>
+  <div class="puzzle-moves" id="puzzleMoves"></div>
+  <div class="puzzle-freepass" id="puzzleFreepass">
+    <div class="puzzle-freepass-text">Oh no it's too difficult for baby boo?<br>Here's a free pass because I love you</div>
+    <button class="puzzle-freepass-btn" id="puzzleFreepassBtn">Skip, I'm too cute for puzzles</button>
+  </div>
+  <button class="btn-primary puzzle-next-btn" id="puzzleNextBtn">Continue</button>
+</div>
+
+<!-- STAGE 5: Adventure -->
+<div class="stage" id="stage5">
+  <div class="adventure-container">
+    <div class="adventure-scene" id="adventureScene">
+      <div class="stars-bg" id="starsBg"></div>
+      <div class="adventure-illustration" id="adventureIllust"></div>
+    </div>
+    <div class="adventure-text" id="adventureText"></div>
+    <div class="adventure-choices" id="adventureChoices"></div>
+  </div>
+</div>
+
+<!-- STAGE 6: Game -->
+<div class="stage" id="stage6">
+  <div class="game-title">Help Hoshi catch the love!</div>
+  <div class="game-score" id="gameScore"></div>
+  <div class="game-instruction">Move Hoshi left and right</div>
+  <div class="game-area" id="gameArea">
+    <div class="basket" id="basket">
+      <div class="basket-kitten-head">
+        <div class="bk-ear bk-ear-l"></div>
+        <div class="bk-ear bk-ear-r"></div>
+        <div class="bk-eyes"><div class="bk-eye"></div><div class="bk-eye"></div></div>
+        <div class="bk-nose"></div>
+      </div>
+      <div class="basket-bowl"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE 7: Proposal -->
+<div class="stage" id="stage7">
+  <div class="proposal-cats fade-in">
+    <svg width="50" height="46" viewBox="0 0 24 24"><use href="#catFace" style="color:#f5c6a0"/></svg>
+    <svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="var(--rose)" opacity="0.6"/></svg>
+    <svg width="50" height="46" viewBox="0 0 24 24"><use href="#catFace" style="color:#b0b0b0"/></svg>
+  </div>
+  <div class="proposal-text fade-in fade-in-d2">Maria,<br>will you be<br>my Valentine?</div>
+  <div class="proposal-buttons fade-in fade-in-d4" id="proposalButtons">
+    <button class="yes-btn" id="yesBtn">Yes!</button>
+    <button class="no-btn" id="noBtn">No</button>
+  </div>
+</div>
+
+<!-- STAGE 8: Celebration -->
+<div class="stage" id="stage8">
+  <div class="celeb-big-heart celeb-heart-anim">
+    <svg width="100" height="100" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="var(--rose)"/></svg>
+  </div>
+  <div class="celeb-text">I knew you'd say yes!</div>
+  <div class="celeb-sub">Happy Valentine's Day, Maria</div>
+  <div class="celeb-tbarakellah">TBAAAAARKELLAH</div>
+  <div class="celeb-kittens">
+    <div>
+      <svg width="45" height="42" viewBox="0 0 24 24"><use href="#catFace" style="color:#f5c6a0"/></svg>
+      <div class="celeb-kitten-label">Nassime</div>
+    </div>
+    <svg width="24" height="24" viewBox="0 0 24 24" style="margin:0 5px;align-self:center;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="var(--coral)" opacity="0.7"/></svg>
+    <div>
+      <svg width="45" height="42" viewBox="0 0 24 24"><use href="#catFace" style="color:#b0b0b0"/></svg>
+      <div class="celeb-kitten-label">Maria</div>
+    </div>
+    <svg width="24" height="24" viewBox="0 0 24 24" style="margin:0 5px;align-self:center;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="var(--coral)" opacity="0.7"/></svg>
+    <div>
+      <svg width="35" height="32" viewBox="0 0 24 24"><use href="#catFace" style="color:#f0e6e0"/></svg>
+      <div class="celeb-kitten-label">Hoshi</div>
+    </div>
+  </div>
+  <div class="celeb-future">
+    From Morocco to Paris, from every TGV ride to every ramen bowl,
+    from Compiègne to the top of Montparnasse...
+    I can't wait for you to come back in March, chaton.
+    And I can't wait to travel the whole world with you.
+    You, me, and Hoshi. Forever.
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const TOTAL_STAGES = 8;
+let currentStage = 1;
+
+// ─── SVG Helpers ───
+function svgHeart(size, color, opacity) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('width', size); s.setAttribute('height', size);
+  s.setAttribute('viewBox', '0 0 24 24');
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d','M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+  p.setAttribute('fill', color || 'var(--rose)');
+  p.setAttribute('opacity', opacity || '1');
+  s.appendChild(p);
+  return s;
+}
+
+function svgPaw(size, color) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('width', size); s.setAttribute('height', size);
+  s.setAttribute('viewBox', '0 0 24 24');
+  const u = document.createElementNS('http://www.w3.org/2000/svg','use');
+  u.setAttribute('href', '#pawShape');
+  s.style.fill = color || 'var(--pink)';
+  s.appendChild(u);
+  return s;
+}
+
+// Scene SVG illustrations for adventure
+const sceneIllusts = {
+  morocco: `<svg width="100" height="80" viewBox="0 0 120 80" fill="none">
+    <circle cx="95" cy="20" r="14" fill="#FFD93D" opacity="0.8"/>
+    <rect x="10" y="40" width="40" height="35" rx="2" fill="#E8C4A0"/>
+    <path d="M10 40 L30 25 L50 40" fill="#D4956A"/>
+    <circle cx="30" cy="52" r="4" fill="#8B6914"/>
+    <rect x="55" y="45" width="30" height="30" rx="2" fill="#F0D4B0"/>
+    <path d="M55 45 L70 32 L85 45" fill="#E0A878"/>
+    <path d="M65 55 L70 48 L75 55" fill="#8B6914"/>
+    <path d="M0 75 Q30 65 60 72 Q90 78 120 70 L120 80 L0 80Z" fill="#F5DEB3" opacity="0.5"/>
+  </svg>`,
+  tgv: `<svg width="120" height="70" viewBox="0 0 140 70" fill="none">
+    <rect x="15" y="25" width="110" height="28" rx="14" fill="#8AAAE5"/>
+    <rect x="105" y="20" width="25" height="33" rx="4" fill="#6B8DD6"/>
+    <rect x="25" y="30" width="12" height="10" rx="2" fill="#B8D4F0" opacity="0.8"/>
+    <rect x="45" y="30" width="12" height="10" rx="2" fill="#B8D4F0" opacity="0.8"/>
+    <rect x="65" y="30" width="12" height="10" rx="2" fill="#B8D4F0" opacity="0.8"/>
+    <rect x="85" y="30" width="12" height="10" rx="2" fill="#B8D4F0" opacity="0.8"/>
+    <circle cx="35" cy="55" r="6" fill="#555"/>
+    <circle cx="35" cy="55" r="3" fill="#888"/>
+    <circle cx="75" cy="55" r="6" fill="#555"/>
+    <circle cx="75" cy="55" r="3" fill="#888"/>
+    <circle cx="105" cy="55" r="6" fill="#555"/>
+    <circle cx="105" cy="55" r="3" fill="#888"/>
+    <line x1="0" y1="61" x2="140" y2="61" stroke="#aaa" stroke-width="2"/>
+  </svg>`,
+  paris: `<svg width="90" height="90" viewBox="0 0 100 100" fill="none">
+    <rect x="38" y="10" width="24" height="80" rx="1" fill="#B0A090"/>
+    <rect x="42" y="8" width="16" height="5" rx="1" fill="#C0B0A0"/>
+    <path d="M30 90 L50 35 L70 90" fill="#A09080" opacity="0.6"/>
+    <rect x="44" y="60" width="4" height="6" rx="1" fill="#FFD93D" opacity="0.6"/>
+    <rect x="52" y="60" width="4" height="6" rx="1" fill="#FFD93D" opacity="0.6"/>
+    <rect x="44" y="72" width="4" height="6" rx="1" fill="#FFD93D" opacity="0.6"/>
+    <rect x="52" y="72" width="4" height="6" rx="1" fill="#FFD93D" opacity="0.6"/>
+    <circle cx="50" cy="18" r="3" fill="#FFD93D" opacity="0.5"/>
+    <circle cx="20" cy="30" r="2" fill="white" opacity="0.6"/>
+    <circle cx="80" cy="25" r="1.5" fill="white" opacity="0.6"/>
+    <circle cx="75" cy="45" r="1" fill="white" opacity="0.5"/>
+    <circle cx="15" cy="55" r="1.5" fill="white" opacity="0.4"/>
+  </svg>`,
+  ramen: `<svg width="90" height="80" viewBox="0 0 100 85" fill="none">
+    <ellipse cx="50" cy="55" rx="38" ry="20" fill="#F5E6D0"/>
+    <ellipse cx="50" cy="50" rx="38" ry="20" fill="#FFF5E6"/>
+    <ellipse cx="50" cy="50" rx="32" ry="16" fill="#F0D4A0"/>
+    <path d="M30 45 Q35 40 40 45 Q45 50 50 45 Q55 40 60 45 Q65 50 70 45" stroke="#E8A060" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <circle cx="42" cy="48" r="4" fill="#B85C3A" opacity="0.7"/>
+    <circle cx="58" cy="46" r="3" fill="#6BAA5D" opacity="0.6"/>
+    <path d="M35 30 Q37 22 39 30" stroke="#DDD" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M50 27 Q52 19 54 27" stroke="#DDD" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M62 30 Q64 22 66 30" stroke="#DDD" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <rect x="72" y="38" width="3" height="25" rx="1" fill="#C68B59"/>
+    <rect x="76" y="38" width="3" height="25" rx="1" fill="#C68B59"/>
+  </svg>`,
+  noel: `<svg width="80" height="90" viewBox="0 0 80 95" fill="none">
+    <polygon points="40,8 15,70 65,70" fill="#2D7A3A"/>
+    <polygon points="40,22 20,65 60,65" fill="#3A9A4A"/>
+    <polygon points="40,35 25,60 55,60" fill="#4AB85A"/>
+    <rect x="36" y="70" width="8" height="12" fill="#8B6914"/>
+    <circle cx="30" cy="45" r="2.5" fill="#FF6B6B"/>
+    <circle cx="50" cy="40" r="2.5" fill="#FFD700"/>
+    <circle cx="38" cy="55" r="2.5" fill="#6BB5FF"/>
+    <circle cx="48" cy="52" r="2" fill="#FF6B6B"/>
+    <circle cx="35" cy="35" r="2" fill="#FFD700"/>
+    <path d="M37 8 L40 2 L43 8" fill="#FFD700"/>
+  </svg>`,
+  hotel: `<svg width="100" height="80" viewBox="0 0 110 85" fill="none">
+    <rect x="20" y="15" width="70" height="60" rx="3" fill="#E8D8C8"/>
+    <rect x="20" y="10" width="70" height="8" rx="2" fill="#D4C4B4"/>
+    <rect x="30" y="25" width="10" height="12" rx="1" fill="#FFE8A0" opacity="0.7"/>
+    <rect x="50" y="25" width="10" height="12" rx="1" fill="#FFE8A0" opacity="0.7"/>
+    <rect x="70" y="25" width="10" height="12" rx="1" fill="#FFE8A0" opacity="0.7"/>
+    <rect x="30" y="45" width="10" height="12" rx="1" fill="#FFE8A0" opacity="0.7"/>
+    <rect x="50" y="45" width="10" height="12" rx="1" fill="#FFE8A0" opacity="0.7"/>
+    <rect x="70" y="45" width="10" height="12" rx="1" fill="#FFE8A0" opacity="0.5"/>
+    <rect x="48" y="58" width="14" height="17" rx="2" fill="#A08060"/>
+    <circle cx="55" cy="12" r="3" fill="#FFD700" opacity="0.6"/>
+  </svg>`,
+  cinema: `<svg width="90" height="70" viewBox="0 0 100 75" fill="none">
+    <rect x="10" y="10" width="80" height="50" rx="4" fill="#2A2A3A"/>
+    <rect x="15" y="14" width="70" height="42" rx="2" fill="#3A3A5A"/>
+    <rect x="18" y="17" width="64" height="36" rx="1" fill="#1A1A2E"/>
+    <path d="M30 35 L45 25 L45 45 Z" fill="white" opacity="0.3"/>
+    <rect x="20" y="62" width="8" height="10" rx="1" fill="#8A5A4A"/>
+    <rect x="32" y="62" width="8" height="10" rx="1" fill="#8A5A4A"/>
+    <rect x="46" y="62" width="8" height="10" rx="1" fill="#8A5A4A"/>
+    <rect x="60" y="62" width="8" height="10" rx="1" fill="#8A5A4A"/>
+    <rect x="72" y="62" width="8" height="10" rx="1" fill="#8A5A4A"/>
+  </svg>`,
+  volleyball: `<svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+    <circle cx="40" cy="40" r="25" fill="#F5E6C8" stroke="#D4A060" stroke-width="1.5"/>
+    <path d="M15 40 Q28 30 40 40 Q52 50 65 40" stroke="#D4A060" stroke-width="1" fill="none"/>
+    <path d="M40 15 Q30 28 40 40 Q50 52 40 65" stroke="#D4A060" stroke-width="1" fill="none"/>
+    <path d="M20 22 Q30 35 25 50" stroke="#D4A060" stroke-width="1" fill="none"/>
+    <path d="M60 22 Q50 35 55 50" stroke="#D4A060" stroke-width="1" fill="none"/>
+  </svg>`,
+  luxembourg: `<svg width="100" height="80" viewBox="0 0 110 85" fill="none">
+    <rect x="10" y="30" width="90" height="40" rx="3" fill="#5A5A5A"/>
+    <rect x="10" y="25" width="90" height="8" rx="2" fill="#6A6A6A"/>
+    <rect x="25" y="38" width="15" height="20" rx="1" fill="#3A3A3A"/>
+    <rect x="50" y="38" width="15" height="20" rx="1" fill="#3A3A3A"/>
+    <rect x="75" y="38" width="15" height="20" rx="1" fill="#3A3A3A"/>
+    <path d="M0 70 Q20 62 40 68 Q60 74 80 66 Q100 60 110 65 L110 85 L0 85Z" fill="#4A8A4A" opacity="0.6"/>
+    <path d="M0 72 Q30 65 55 72 Q80 78 110 70 L110 85 L0 85Z" fill="#3A7A3A" opacity="0.4"/>
+    <circle cx="90" cy="18" r="8" fill="#FFD93D" opacity="0.5"/>
+    <path d="M55 40 L58 43 L55 46" stroke="#ff6b8a" stroke-width="1.5" fill="none" opacity="0.8"/>
+    <path d="M60 40 L57 43 L60 46" stroke="#ff6b8a" stroke-width="1.5" fill="none" opacity="0.8"/>
+  </svg>`,
+  gym: `<svg width="90" height="80" viewBox="0 0 100 80" fill="none">
+    <rect x="15" y="35" width="70" height="6" rx="3" fill="#888"/>
+    <rect x="5" y="28" width="12" height="20" rx="2" fill="#E84876"/>
+    <rect x="83" y="28" width="12" height="20" rx="2" fill="#E84876"/>
+    <rect x="0" y="30" width="7" height="16" rx="2" fill="#D63384"/>
+    <rect x="93" y="30" width="7" height="16" rx="2" fill="#D63384"/>
+    <circle cx="50" cy="60" r="3" fill="#ff8fab" opacity="0.5"/>
+    <circle cx="35" cy="65" r="2" fill="#ff8fab" opacity="0.3"/>
+    <circle cx="65" cy="63" r="2.5" fill="#ff8fab" opacity="0.4"/>
+  </svg>`,
+  techno: `<svg width="90" height="80" viewBox="0 0 100 80" fill="none">
+    <rect x="10" y="50" width="80" height="20" rx="3" fill="#2A2A3A"/>
+    <rect x="15" y="45" width="70" height="8" rx="2" fill="#3A3A5A"/>
+    <circle cx="30" cy="54" r="4" fill="#1A1A2E" stroke="#ff8fab" stroke-width="1"/>
+    <circle cx="50" cy="54" r="4" fill="#1A1A2E" stroke="#ff7eb3" stroke-width="1"/>
+    <circle cx="70" cy="54" r="4" fill="#1A1A2E" stroke="#e84876" stroke-width="1"/>
+    <rect x="22" y="62" width="5" height="3" rx="1" fill="#ff8fab" opacity="0.6"/>
+    <rect x="35" y="62" width="5" height="3" rx="1" fill="#ff7eb3" opacity="0.6"/>
+    <rect x="60" y="62" width="5" height="3" rx="1" fill="#e84876" opacity="0.6"/>
+    <rect x="25" y="20" width="3" height="25" rx="1" fill="#555"/>
+    <rect x="72" y="22" width="3" height="23" rx="1" fill="#555"/>
+    <ellipse cx="26" cy="16" rx="8" ry="6" fill="#3A3A5A" opacity="0.6"/>
+    <ellipse cx="73" cy="18" rx="8" ry="6" fill="#3A3A5A" opacity="0.6"/>
+    <circle cx="50" cy="30" r="6" fill="#FFD93D" opacity="0.15"/>
+    <circle cx="30" cy="35" r="4" fill="#ff8fab" opacity="0.1"/>
+    <circle cx="70" cy="33" r="5" fill="#e84876" opacity="0.1"/>
+  </svg>`,
+  world: `<svg width="90" height="90" viewBox="0 0 100 100" fill="none">
+    <circle cx="50" cy="50" r="35" fill="#7EC8E3" stroke="#5BA8C8" stroke-width="1"/>
+    <ellipse cx="50" cy="50" rx="15" ry="35" fill="none" stroke="#5BA8C8" stroke-width="0.8"/>
+    <line x1="15" y1="50" x2="85" y2="50" stroke="#5BA8C8" stroke-width="0.8"/>
+    <path d="M25 35 Q35 30 45 35 Q50 38 55 35 Q60 32 70 38" fill="#6BAA5D" opacity="0.6"/>
+    <path d="M30 55 Q40 50 50 55 Q55 58 65 52" fill="#6BAA5D" opacity="0.6"/>
+    <path d="M22 42 Q28 40 32 44" fill="#6BAA5D" opacity="0.5"/>
+    <path d="M65 60 Q70 56 75 60" fill="#6BAA5D" opacity="0.5"/>
+    <path d="M60 15 Q65 12 70 18" stroke="none" fill="#F5F5F5" opacity="0.3"/>
+  </svg>`
+};
+
+// ─── Floating Hearts (SVG) ───
+function createFloatingHearts() {
+  const c = $('heartsBg');
+  const colors = ['#ff8fab','#e84876','#ff7eb3','#ffb3c6','#ffd6e0'];
+  for (let i = 0; i < 18; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'floating-heart';
+    wrap.style.left = Math.random() * 100 + '%';
+    wrap.style.animationDuration = (10 + Math.random() * 14) + 's';
+    wrap.style.animationDelay = Math.random() * 12 + 's';
+    const size = 12 + Math.random() * 14;
+    wrap.appendChild(svgHeart(size, colors[Math.floor(Math.random()*colors.length)], 0.5 + Math.random()*0.5));
+    c.appendChild(wrap);
+  }
+}
+
+function addSparkles() {
+  setInterval(() => {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.top = Math.random() * 100 + 'vh';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 2500);
+  }, 600);
+}
+
+// ─── Stage Management ───
+function goToStage(n) {
+  sfx('whoosh');
+  $('stage' + currentStage).classList.remove('active');
+  currentStage = n;
+  setTimeout(() => {
+    $('stage' + n).classList.add('active');
+    $('progressFill').style.width = ((n / TOTAL_STAGES) * 100) + '%';
+    if (n === 2) startLetter();
+    if (n === 3) startScratchCards();
+    if (n === 4) startPuzzle();
+    if (n === 5) startAdventure();
+    if (n === 6) startGame();
+    if (n === 8) startCelebration();
+  }, 500);
+}
+
+// ═══ STAGE 1 ═══
+$('envelope').addEventListener('click', () => { $('envelope').classList.add('open'); sfx('envelope'); });
+$('startBtn').addEventListener('click', () => {
+  $('envelope').classList.add('open');
+  sfx('envelope'); sfx('purr');
+  autoStartMusic();
+  setTimeout(() => goToStage(2), 300);
+});
+
+// ═══ STAGE 2: LETTER ═══
+const letterText = `My dearest Maria,
+
+Do you remember Morocco, summer 2024? Your birthday. That's when everything started again — when I looked into those amazing eyes of yours and my life was about to change forever.
+
+You became my whole world. Every TGV between Paris and Nancy, every weekend spent running to each other — I would cross that distance a million times just to see your smile. And chaton, you have the most beautiful smile anyone has ever laid eyes upon.
+
+Those ramen dates where we'd talk for hours. Our anime nights curled up together. Training together at Basic Fit like the power couple we are. Getting lost in techno together. That hike in Luxembourg where we... well, you know exactly what happened in that bunker. The marchés de Noël in Nancy, in Paris, and in Compiègne where we celebrated our first year — even if those hotel massages were... sketchy.
+
+When you moved to Paris, right next to me... those were my happiest days. Every night together. Every cinema date. Waking up next to my little angel.
+
+Now you're back in Morocco for a while, and I miss you more than words can say. I miss your voice, your laugh, the way you care about everything so deeply. My pro volleyball player, my architect dreamer, my fellow traveller.
+
+But I know this — the distance is nothing. Because every time I close my eyes, I see us. Exploring the world together. Building our life. You, me, and Hoshi.
+
+I love you, Maria. More than everything. TBAAAAARKELLAH.`;
+
+function startLetter() {
+  const body = $('letterBody');
+  body.innerHTML = '';
+  const words = letterText.split(/(\s+)/);
+  let delay = 0, wordCount = 0;
+  words.forEach(word => {
+    if (word === '\n' || word === '\n\n') {
+      body.appendChild(document.createElement('br'));
+      if (word === '\n\n') body.appendChild(document.createElement('br'));
+      return;
+    }
+    const span = document.createElement('span');
+    span.className = 'word'; span.textContent = word;
+    span.style.animationDelay = delay + 'ms';
+    body.appendChild(span);
+    if (word.trim()) { wordCount++; if (wordCount % 4 === 0) setTimeout(() => sfx('typewriter'), delay); delay += 50; }
+  });
+  const t = delay + 600;
+  setTimeout(() => { $('letterSig').style.opacity = '1'; $('letterSig').style.transition = 'opacity 0.8s'; }, t);
+  setTimeout(() => { $('letterNextBtn').style.opacity = '1'; $('letterNextBtn').style.transition = 'opacity 0.8s'; }, t + 600);
+}
+$('letterNextBtn').addEventListener('click', () => { sfx('click'); goToStage(3); });
+
+
+// ═══ STAGE 3: SCRATCH ═══
+const scratchReasons = [
+  "Those eyes... I get lost in them every single time",
+  "Your voice — I could listen to you talk forever",
+  "That smile... the most beautiful in the whole world",
+  "Our gym sessions at Basic Fit, pushing each other",
+  "Dancing to techno together — you and me, lost in the music",
+  "Every TGV ride was worth it just to see you",
+  "The way you care, so deeply, about everything",
+  "Your passion for space, art, and architecture"
+];
+let scratchRevealed = 0;
+function startScratchCards() {
+  const grid = $('scratchGrid'); grid.innerHTML = '';
+  scratchRevealed = 0; updateScratchCounter();
+  scratchReasons.forEach((reason, i) => {
+    const card = document.createElement('div');
+    card.className = 'scratch-card';
+    const paw = svgPaw(24, 'white');
+    card.innerHTML = `<div class="scratch-content">${reason}</div>
+      <div class="scratch-overlay" id="scratch${i}">
+        <div class="scratch-icon"></div><div>Tap me</div>
+      </div>`;
+    card.querySelector('.scratch-icon').appendChild(svgPaw(22, 'rgba(255,255,255,0.9)'));
+    card.addEventListener('click', () => revealScratch(i));
+    grid.appendChild(card);
+  });
+}
+function revealScratch(i) {
+  const overlay = $('scratch' + i);
+  if (overlay.classList.contains('revealed')) return;
+  overlay.classList.add('revealed');
+  sfx('scratch');
+  scratchRevealed++; updateScratchCounter();
+  for (let j = 0; j < 4; j++) {
+    setTimeout(() => {
+      const h = document.createElement('div');
+      h.className = 'heart-explosion';
+      const heart = svgHeart(16 + Math.random()*12, ['#ff8fab','#e84876','#ff7eb3'][Math.floor(Math.random()*3)]);
+      h.appendChild(heart);
+      h.style.left = (Math.random()*100) + 'vw'; h.style.top = (Math.random()*100) + 'vh';
+      h.style.setProperty('--tx', (Math.random()-0.5)*200+'px');
+      h.style.setProperty('--ty', (Math.random()-0.5)*200+'px');
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 1500);
+    }, j*100);
+  }
+  if (scratchRevealed >= scratchReasons.length) { sfx('win'); setTimeout(() => $('scratchNextBtn').classList.add('show'), 500); }
+}
+function updateScratchCounter() { $('scratchCounter').textContent = `${scratchRevealed} / ${scratchReasons.length} revealed`; }
+$('scratchNextBtn').addEventListener('click', () => { sfx('click'); goToStage(4); });
+
+// ═══ STAGE 5: PUZZLE ═══
+const PUZZLE_COLS = 4, PUZZLE_ROWS = 3;
+const PUZZLE_SIZE = PUZZLE_COLS * PUZZLE_ROWS;
+let puzzleTiles = [], emptyIdx = PUZZLE_SIZE - 1, puzzleMoves = 0;
+
+function startPuzzle() {
+  puzzleMoves = 0;
+  updatePuzzleMoves();
+  // Create solved state [0..10, 11=empty]
+  puzzleTiles = Array.from({length: PUZZLE_SIZE}, (_, i) => i);
+  // Shuffle by making random valid moves (ensures solvability)
+  for (let i = 0; i < 200; i++) {
+    const neighbors = getNeighbors(emptyIdx);
+    const pick = neighbors[Math.floor(Math.random() * neighbors.length)];
+    [puzzleTiles[emptyIdx], puzzleTiles[pick]] = [puzzleTiles[pick], puzzleTiles[emptyIdx]];
+    emptyIdx = pick;
+  }
+  renderPuzzle();
+}
+
+function getNeighbors(idx) {
+  const row = Math.floor(idx / PUZZLE_COLS), col = idx % PUZZLE_COLS;
+  const n = [];
+  if (row > 0) n.push(idx - PUZZLE_COLS);
+  if (row < PUZZLE_ROWS - 1) n.push(idx + PUZZLE_COLS);
+  if (col > 0) n.push(idx - 1);
+  if (col < PUZZLE_COLS - 1) n.push(idx + 1);
+  return n;
+}
+
+function renderPuzzle() {
+  const grid = $('puzzleGrid');
+  grid.innerHTML = '';
+  puzzleTiles.forEach((tile, idx) => {
+    const div = document.createElement('div');
+    div.className = 'puzzle-tile';
+    if (tile === PUZZLE_SIZE - 1) {
+      div.classList.add('empty');
+    } else {
+      const col = tile % PUZZLE_COLS;
+      const row = Math.floor(tile / PUZZLE_COLS);
+      div.style.backgroundImage = 'url(photo.jpg)';
+      div.style.backgroundPosition = `${(col / (PUZZLE_COLS - 1)) * 100}% ${(row / (PUZZLE_ROWS - 1)) * 100}%`;
+      if (tile === idx) div.classList.add('correct');
+    }
+    div.addEventListener('click', () => onTileClick(idx));
+    grid.appendChild(div);
+  });
+}
+
+function onTileClick(idx) {
+  if (!getNeighbors(idx).includes(emptyIdx)) return;
+  sfx('tile');
+  puzzleTiles[emptyIdx] = puzzleTiles[idx];
+  puzzleTiles[idx] = PUZZLE_SIZE - 1;
+  emptyIdx = idx;
+  puzzleMoves++;
+  updatePuzzleMoves();
+  renderPuzzle();
+  // Check win
+  if (puzzleTiles.every((t, i) => t === i)) {
+    setTimeout(() => puzzleWin(), 300);
+  }
+}
+
+function updatePuzzleMoves() {
+  $('puzzleMoves').textContent = `Moves: ${puzzleMoves}`;
+  if (puzzleMoves >= 12) {
+    $('puzzleFreepass').classList.add('show');
+  }
+}
+
+function puzzleWin() {
+  sfx('win');
+  // Show complete overlay briefly, then reveal full photo
+  $('puzzleComplete').classList.add('show');
+  const reveal = $('puzzleReveal');
+  reveal.style.backgroundImage = 'url(photo.jpg)';
+  setTimeout(() => {
+    reveal.classList.add('show');
+    $('puzzleNextBtn').classList.add('show');
+  }, 800);
+}
+
+$('puzzleFreepassBtn').addEventListener('click', () => {
+  sfx('purr');
+  $('puzzleFreepass').style.display = 'none';
+  puzzleWin();
+});
+$('puzzleNextBtn').addEventListener('click', () => { sfx('click'); goToStage(5); });
+
+// ═══ STAGE 5: ADVENTURE ═══
+const adventureStory = [
+  { scene: 'morocco', text: "It was summer 2024 in Morocco. A chaton named Nassime saw a beautiful chaton named Maria on her birthday. Their eyes met and... everything changed.",
+    choices: [{ text: "Fast forward to the TGV era", next: 1 }, { text: "Skip to Paris", next: 2 }] },
+  { scene: 'tgv', text: "Paris to Nancy. Every single week! One chaton on the TGV, heart racing faster than the train. Sometimes she came to Paris, sometimes he ran to le Grand Est. Nothing could stop these chatons from being together.",
+    choices: [{ text: "What did they do on dates?", next: 3 }, { text: "Tell me about the marchés de Noël", next: 4 }] },
+  { scene: 'paris', text: "At the top of Tour Montparnasse, all of Paris sparkled below them. The chaton named Nassime turned to his Maria and said: 'I want to be your chaton forever.' And just like that, it was official — high above the city of love.",
+    choices: [{ text: "Time for ramen", next: 3 }, { text: "What happened next?", next: 1 }] },
+  { scene: 'ramen', text: "The two chatons had the BEST dates: giant bowls of ramen, then home for anime marathons, giving each other massages until they fell asleep together. Life was perfect.",
+    choices: [{ text: "Tell me about Noël", next: 4 }, { text: "Skip to the anniversary", next: 5 }] },
+  { scene: 'noel', text: "The chatons LOVED the marchés de Noël! Vin chaud in Nancy, crêpes in Paris, and the magical lights everywhere... paw in paw, with rosy noses and warm hearts. The holiday season was their favorite.",
+    choices: [{ text: "What about the anniversary?", next: 5 }, { text: "Let's go to the cinema", next: 6 }] },
+  { scene: 'hotel', text: "For their 1st anniversary, the chatons went to a luxurious hotel in Compiègne! Really good bar dates, stuffing themselves at the hotel breakfast the next morning... and the most hilariously sketchy spa massages they'd ever experienced! They laughed so hard they almost cried!",
+    choices: [{ text: "Cinema time", next: 6 }, { text: "What about volleyball?", next: 7 }] },
+  { scene: 'cinema', text: "When Maria chaton moved to Paris right next to Nassime, they spent every single night together. Cinema dates, late night walks, falling asleep in each other's paws... those were the happiest days.",
+    choices: [{ text: "What about Luxembourg?", next: 7 }, { text: "Tell me about their workouts", next: 8 }] },
+  { scene: 'luxembourg', text: "Ah, Luxembourg... The two chatons went hiking and found an old bunker from the war. And then... well... let's just say they made some VERY unforgettable memories in there. The kind you don't tell your parents about. The chatons looked at each other after and just burst out laughing. LEGENDARY.",
+    choices: [{ text: "HAHA okay what about the gym?", next: 8 }, { text: "Skip to the techno!", next: 9 }] },
+  { scene: 'gym', text: "The two chatons didn't just eat ramen — they TRAINED together at Basic Fit! Pushing each other, getting stronger, being each other's motivation. Nassime chaton loved watching his Maria crush her workouts. Power couple energy!",
+    choices: [{ text: "Tell me about the techno", next: 9 }, { text: "What does the future hold?", next: 10 }] },
+  { scene: 'techno', text: "BOOM BOOM BOOM. The chatons LOVED techno. Lost in the bass, lost in each other, dancing like nobody's watching. The music, the energy, the feeling of being completely free together... pure magic.",
+    choices: [{ text: "What does the future hold?", next: 10 }] },
+  { scene: 'world', text: "Now the chatons dream of travelling the whole world together. From Morocco to Tokyo, from Paris to everywhere their paws can take them. And one day... a home of their own, with Hoshi purring on the couch.\n\nBut right now, Nassime chaton is waiting for his Maria to come back in March... and he has one very important question to ask...",
+    choices: [{ text: "What question?", next: -1 }] }
+];
+let adventureStep = 0;
+function startAdventure() {
+  const starsBg = $('starsBg'); starsBg.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const star = document.createElement('div'); star.className = 'star';
+    star.style.left = Math.random()*100+'%'; star.style.top = Math.random()*100+'%';
+    star.style.animationDelay = Math.random()*2+'s';
+    star.style.width = star.style.height = (1+Math.random()*2)+'px';
+    starsBg.appendChild(star);
+  }
+  adventureStep = 0; showAdventureStep();
+}
+function showAdventureStep() {
+  const step = adventureStory[adventureStep];
+  $('adventureIllust').innerHTML = sceneIllusts[step.scene] || '';
+  $('adventureText').textContent = step.text;
+  const choices = $('adventureChoices'); choices.innerHTML = '';
+  step.choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'adventure-choice'; btn.textContent = c.text;
+    btn.addEventListener('click', () => {
+      sfx('adventure');
+      if (c.next === -1) { goToStage(6); return; }
+      adventureStep = c.next;
+      [$('adventureIllust'),$('adventureText'),choices].forEach(el => el.style.opacity = '0');
+      setTimeout(() => {
+        showAdventureStep();
+        [$('adventureIllust'),$('adventureText'),choices].forEach(el => el.style.opacity = '1');
+      }, 400);
+    });
+    choices.appendChild(btn);
+  });
+  [$('adventureIllust'),$('adventureText'),choices].forEach(el => el.style.transition = 'opacity 0.3s');
+}
+
+// ═══ STAGE 6: GAME ═══
+let gameScore = 0; const GAME_TARGET = 8;
+let gameActive = false, basketX = 0, gameInterval, spawnInterval;
+function startGame() {
+  gameScore = 0; gameActive = true; updateGameScore();
+  const area = $('gameArea'), basket = $('basket');
+  basketX = area.clientWidth / 2; basket.style.left = basketX + 'px';
+  function moveBasket(cx) {
+    const r = area.getBoundingClientRect();
+    basketX = Math.max(40, Math.min(r.width-40, cx-r.left));
+    basket.style.left = basketX + 'px';
+  }
+  area.addEventListener('touchmove', e => { e.preventDefault(); moveBasket(e.touches[0].clientX); }, {passive:false});
+  area.addEventListener('touchstart', e => { e.preventDefault(); moveBasket(e.touches[0].clientX); }, {passive:false});
+  area.addEventListener('mousemove', e => moveBasket(e.clientX));
+  spawnInterval = setInterval(() => { if (gameActive) spawnFallingItem(); }, 700);
+  gameInterval = setInterval(() => { if (gameActive) checkCollisions(); }, 50);
+}
+function spawnFallingItem() {
+  const area = $('gameArea'), item = document.createElement('div');
+  item.className = 'falling-item';
+  const colors = ['#ff8fab','#e84876','#ff7eb3','#ffb3c6','#d63384'];
+  const size = 22 + Math.random()*10;
+  item.appendChild(svgHeart(size, colors[Math.floor(Math.random()*colors.length)]));
+  item.style.left = (20 + Math.random()*(area.clientWidth-60)) + 'px';
+  const dur = 2.2 + Math.random()*1.3;
+  item.style.animationDuration = dur + 's';
+  area.appendChild(item);
+  setTimeout(() => { if (item.parentNode) item.remove(); }, dur*1000+100);
+}
+function checkCollisions() {
+  const bRect = $('basket').getBoundingClientRect();
+  $('gameArea').querySelectorAll('.falling-item').forEach(item => {
+    const r = item.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    if (cx > bRect.left-10 && cx < bRect.right+10 && cy > bRect.top-5 && cy < bRect.bottom+10) {
+      item.remove(); gameScore++; sfx('catch'); updateGameScore();
+      const flash = document.createElement('div'); flash.className = 'catch-flash';
+      $('gameArea').appendChild(flash); setTimeout(() => flash.remove(), 400);
+      if (gameScore >= GAME_TARGET) {
+        gameActive = false; clearInterval(gameInterval); clearInterval(spawnInterval);
+        sfx('win');
+        $('gameArea').querySelectorAll('.falling-item').forEach(h => h.remove());
+        setTimeout(() => goToStage(7), 800);
+      }
+    }
+  });
+}
+function updateGameScore() {
+  const el = $('gameScore'); el.innerHTML = '';
+  for (let i = 0; i < GAME_TARGET; i++) {
+    const h = svgHeart(18, i < gameScore ? 'var(--rose)' : '#e0c8d0');
+    h.classList.add('score-heart');
+    if (i >= gameScore) h.classList.add('empty');
+    el.appendChild(h);
+  }
+}
+
+// ═══ STAGE 7: PROPOSAL ═══
+let noAttempts = 0;
+const noTexts = ['No', 'Are you sure?', 'Really Maria?!', 'Hoshi will cry...', 'Think again chaton...', '...'];
+const noBtn = $('noBtn');
+function handleNoDodge(e) {
+  e.preventDefault(); sfx('dodge'); noAttempts++;
+  if (noAttempts >= 5) { noBtn.classList.add('gone'); return; }
+  noBtn.textContent = noTexts[Math.min(noAttempts, noTexts.length-1)];
+  if (noAttempts === 1) noBtn.classList.add('dodge');
+  if (noAttempts >= 3) noBtn.classList.add('shrinking');
+  if (noAttempts >= 4) noBtn.classList.add('tiny');
+  noBtn.style.left = (30+Math.random()*(window.innerWidth-130))+'px';
+  noBtn.style.top = (30+Math.random()*(window.innerHeight-60))+'px';
+}
+noBtn.addEventListener('mouseenter', handleNoDodge);
+noBtn.addEventListener('touchstart', handleNoDodge);
+$('yesBtn').addEventListener('click', () => {
+  sfx('yes');
+  for (let i = 0; i < 25; i++) setTimeout(() => createHeartExplosion($('yesBtn')), i*40);
+  setTimeout(() => goToStage(8), 600);
+});
+function createHeartExplosion(source) {
+  const rect = source.getBoundingClientRect();
+  const h = document.createElement('div'); h.className = 'heart-explosion';
+  const colors = ['#ff8fab','#e84876','#ff7eb3','#ffb3c6','#ffd700'];
+  h.appendChild(svgHeart(18+Math.random()*18, colors[Math.floor(Math.random()*colors.length)]));
+  h.style.left = (rect.left+rect.width/2)+'px'; h.style.top = (rect.top+rect.height/2)+'px';
+  const angle = Math.random()*Math.PI*2, dist = 100+Math.random()*250;
+  h.style.setProperty('--tx', Math.cos(angle)*dist+'px');
+  h.style.setProperty('--ty', Math.sin(angle)*dist+'px');
+  document.body.appendChild(h); setTimeout(() => h.remove(), 1500);
+}
+
+// ═══ STAGE 8: CELEBRATION ═══
+function startCelebration() {
+  sfx('celebration');
+  for (let i = 0; i < 80; i++) setTimeout(() => createConfetti(), i*25);
+  setInterval(() => { for (let i = 0; i < 2; i++) createConfetti(); }, 600);
+  for (let i = 0; i < 15; i++) {
+    setTimeout(() => {
+      const f = { getBoundingClientRect: () => ({ left:window.innerWidth/2-20, top:window.innerHeight/2-20, width:40, height:40 })};
+      createHeartExplosion(f);
+    }, i*80);
+  }
+}
+function createConfetti() {
+  const c = document.createElement('div'); c.className = 'confetti-piece';
+  const colors = ['#ff8fab','#e84876','#ffd700','#ff7eb3','#ffb3c6','#e8d5f5','#ff6b8a','#66bb6a','#7ec8e3'];
+  c.style.width = (5+Math.random()*8)+'px';
+  c.style.height = (3+Math.random()*5)+'px';
+  c.style.background = colors[Math.floor(Math.random()*colors.length)];
+  c.style.borderRadius = Math.random()>0.5 ? '50%' : '1px';
+  c.style.left = Math.random()*100+'vw'; c.style.top = '-15px';
+  c.style.animationDuration = (2.5+Math.random()*3)+'s';
+  c.style.transform = `rotate(${Math.random()*360}deg)`;
+  document.body.appendChild(c); setTimeout(() => c.remove(), 6000);
+}
+
+// ═══ ANIMATED DECORATIONS ═══
+function addFloatingPaws() {
+  const positions = [
+    {left:'5%',top:'15%',delay:0}, {right:'8%',top:'25%',delay:1.5},
+    {left:'3%',bottom:'20%',delay:3}, {right:'5%',bottom:'30%',delay:0.8},
+    {left:'12%',top:'60%',delay:2.2}, {right:'12%',top:'50%',delay:4}
+  ];
+  positions.forEach(pos => {
+    const d = document.createElement('div');
+    d.className = 'floating-paw';
+    Object.keys(pos).forEach(k => { if (k !== 'delay') d.style[k] = pos[k]; });
+    d.style.animationDelay = pos.delay + 's';
+    d.appendChild(svgPaw(20 + Math.random()*10, ['var(--pink)','var(--rose)','var(--blush)'][Math.floor(Math.random()*3)]));
+    document.body.appendChild(d);
+  });
+}
+
+function addWalkingCat() {
+  const cat = document.createElement('div');
+  cat.className = 'deco-cat-walking';
+  // Simple walking cat silhouette
+  cat.innerHTML = `<svg width="60" height="35" viewBox="0 0 60 35" fill="none">
+    <ellipse cx="25" cy="18" rx="14" ry="8" fill="var(--pink)" opacity="0.6"/>
+    <circle cx="38" cy="12" r="7" fill="var(--pink)" opacity="0.6"/>
+    <path d="M33 7 L36 2 L38 7" fill="var(--pink)" opacity="0.6"/>
+    <path d="M40 7 L43 2 L44 7" fill="var(--pink)" opacity="0.6"/>
+    <circle cx="36" cy="11" r="1" fill="#3a2a1a"/>
+    <circle cx="41" cy="11" r="1" fill="#3a2a1a"/>
+    <ellipse cx="38.5" cy="13" rx="0.8" ry="0.5" fill="#ffaaaa"/>
+    <rect x="16" y="24" width="2.5" height="10" rx="1" fill="var(--pink)" opacity="0.6"/>
+    <rect x="22" y="24" width="2.5" height="10" rx="1" fill="var(--pink)" opacity="0.6"/>
+    <rect x="28" y="24" width="2.5" height="10" rx="1" fill="var(--pink)" opacity="0.6"/>
+    <rect x="33" y="24" width="2.5" height="10" rx="1" fill="var(--pink)" opacity="0.6"/>
+    <path d="M10 18 Q5 14 3 18 Q1 22 6 20" fill="var(--pink)" opacity="0.6"/>
+  </svg>`;
+  document.body.appendChild(cat);
+}
+
+function addHeartOrbit() {
+  const orbit = document.createElement('div');
+  orbit.className = 'deco-heart-orbit';
+  orbit.style.right = '30px'; orbit.style.top = '40%';
+  const radius = 25;
+  for (let i = 0; i < 3; i++) {
+    const h = document.createElement('div');
+    h.className = 'orbit-heart';
+    const angle = (i / 3) * Math.PI * 2;
+    h.style.left = (Math.cos(angle) * radius) + 'px';
+    h.style.top = (Math.sin(angle) * radius) + 'px';
+    h.style.animationDelay = (i * 0.6) + 's';
+    h.appendChild(svgHeart(10, ['var(--pink)','var(--rose)','var(--coral)'][i], 0.5));
+    orbit.appendChild(h);
+  }
+  document.body.appendChild(orbit);
+}
+
+function spawnPawTrails() {
+  setInterval(() => {
+    const p = document.createElement('div');
+    p.className = 'paw-trail';
+    p.style.left = (10 + Math.random() * 80) + 'vw';
+    p.style.top = (10 + Math.random() * 80) + 'vh';
+    p.style.setProperty('--rot', (Math.random() * 60 - 30) + 'deg');
+    p.appendChild(svgPaw(14 + Math.random()*8, 'var(--pink)'));
+    p.style.opacity = '0.15';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3000);
+  }, 2500);
+}
+
+// ═══ MUSIC BOX ═══
+let musicCtx = null, musicPlaying = false, musicGain = null, musicTimeout = null;
+
+function initMusic() {
+  if (musicCtx) return;
+  musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicGain = musicCtx.createGain();
+  musicGain.gain.value = 0.12;
+  musicGain.connect(musicCtx.destination);
+}
+
+function playNote(freq, startTime, duration, type) {
+  const osc = musicCtx.createOscillator();
+  const noteGain = musicCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  // Music box envelope: quick attack, gentle decay
+  noteGain.gain.setValueAtTime(0, startTime);
+  noteGain.gain.linearRampToValueAtTime(0.6, startTime + 0.02);
+  noteGain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+  osc.connect(noteGain);
+  noteGain.connect(musicGain);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+function playMelody() {
+  if (!musicPlaying || !musicCtx) return;
+  const now = musicCtx.currentTime;
+  const bpm = 90;
+  const beat = 60 / bpm;
+
+  // Cute romantic music box melody in C major / A minor
+  // Notes: C4=262, D4=294, E4=330, F4=349, G4=392, A4=440, B4=494
+  // C5=523, D5=587, E5=659, F5=698, G5=784, A5=880
+  const melody = [
+    // Phrase 1: gentle ascending
+    [659, 1],   // E5
+    [784, 0.5], // G5
+    [659, 0.5], // E5
+    [523, 1],   // C5
+    [587, 0.5], // D5
+    [523, 0.5], // C5
+    [440, 1.5], // A4
+    [0, 0.5],   // rest
+    // Phrase 2: playful
+    [523, 0.75],// C5
+    [587, 0.75],// D5
+    [659, 0.75],// E5
+    [784, 0.75],// G5
+    [659, 1],   // E5
+    [587, 0.5], // D5
+    [523, 1.5], // C5
+    [0, 0.5],   // rest
+    // Phrase 3: dreamy
+    [440, 1],   // A4
+    [523, 0.5], // C5
+    [659, 1],   // E5
+    [587, 0.5], // D5
+    [523, 1],   // C5
+    [440, 0.5], // A4
+    [392, 1.5], // G4
+    [0, 0.5],   // rest
+    // Phrase 4: resolution
+    [523, 0.75],// C5
+    [440, 0.75],// A4
+    [523, 0.75],// C5
+    [659, 0.75],// E5
+    [587, 1],   // D5
+    [523, 1],   // C5
+    [523, 1.5], // C5 (hold)
+    [0, 1],     // rest before loop
+  ];
+
+  // Soft pad/harmony layer
+  const harmony = [
+    [262, 4], [220, 4], // C4, A3
+    [262, 4], [220, 4],
+    [220, 4], [262, 4],
+    [262, 4], [262, 4],
+  ];
+
+  let t = now + 0.1;
+
+  // Play melody (music box - sine)
+  melody.forEach(([freq, dur]) => {
+    if (freq > 0) {
+      playNote(freq, t, dur * beat * 0.9, 'sine');
+      // Add a subtle harmonic overtone for music box shimmer
+      playNote(freq * 2, t, dur * beat * 0.4, 'sine');
+    }
+    t += dur * beat;
+  });
+
+  // Play harmony pad (triangle - soft)
+  let ht = now + 0.1;
+  harmony.forEach(([freq, dur]) => {
+    if (freq > 0) {
+      const osc = musicCtx.createOscillator();
+      const g = musicCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, ht);
+      g.gain.linearRampToValueAtTime(0.15, ht + 0.3);
+      g.gain.linearRampToValueAtTime(0.1, ht + dur * beat * 0.8);
+      g.gain.exponentialRampToValueAtTime(0.001, ht + dur * beat);
+      osc.connect(g);
+      g.connect(musicGain);
+      osc.start(ht);
+      osc.stop(ht + dur * beat);
+    }
+    ht += dur * beat;
+  });
+
+  // Loop
+  const totalDuration = melody.reduce((s, [, d]) => s + d, 0) * beat;
+  musicTimeout = setTimeout(() => playMelody(), totalDuration * 1000);
+}
+
+function toggleMusic() {
+  const btn = $('musicToggle');
+  if (!musicPlaying) {
+    initMusic();
+    if (musicCtx.state === 'suspended') musicCtx.resume();
+    musicPlaying = true;
+    btn.classList.remove('muted');
+    playMelody();
+  } else {
+    musicPlaying = false;
+    btn.classList.add('muted');
+    if (musicTimeout) clearTimeout(musicTimeout);
+  }
+}
+
+$('musicToggle').addEventListener('click', toggleMusic);
+
+// Auto-start music on first user interaction
+let musicAutoStarted = false;
+function autoStartMusic() {
+  if (musicAutoStarted) return;
+  musicAutoStarted = true;
+  if (!musicPlaying) toggleMusic();
+}
+
+// ═══ SOUND EFFECTS ═══
+let sfxCtx = null;
+function getSfxCtx() {
+  if (!sfxCtx) sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (sfxCtx.state === 'suspended') sfxCtx.resume();
+  return sfxCtx;
+}
+
+function sfx(type) {
+  if ($('musicToggle').classList.contains('muted')) return;
+  try {
+    const ctx = getSfxCtx();
+    const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.value = 0.15;
+    master.connect(ctx.destination);
+
+    if (type === 'click') {
+      // Soft click/tap
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.value = 800;
+      o.type = 'sine';
+      g.gain.setValueAtTime(0.3, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.08);
+    }
+
+    else if (type === 'envelope') {
+      // Paper rustle — filtered noise burst
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.3;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const filt = ctx.createBiquadFilter();
+      filt.type = 'bandpass'; filt.frequency.value = 3000; filt.Q.value = 0.5;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.4, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      src.connect(filt); filt.connect(g); g.connect(master);
+      src.start(now); src.stop(now + 0.4);
+      // Soft pop
+      const o = ctx.createOscillator();
+      const og = ctx.createGain();
+      o.frequency.value = 400; o.type = 'sine';
+      og.gain.setValueAtTime(0.15, now);
+      og.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      o.connect(og); og.connect(master);
+      o.start(now); o.stop(now + 0.15);
+    }
+
+    else if (type === 'typewriter') {
+      // Tiny tick
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.value = 1200 + Math.random() * 400;
+      o.type = 'square';
+      g.gain.setValueAtTime(0.06, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.03);
+    }
+
+    else if (type === 'scratch') {
+      // Scratch reveal — sweep up
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(300, now);
+      o.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+      g.gain.setValueAtTime(0.25, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.2);
+      // Sparkle
+      const o2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      o2.type = 'sine'; o2.frequency.value = 1800;
+      g2.gain.setValueAtTime(0, now + 0.1);
+      g2.gain.linearRampToValueAtTime(0.15, now + 0.12);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      o2.connect(g2); g2.connect(master);
+      o2.start(now + 0.1); o2.stop(now + 0.35);
+    }
+
+    else if (type === 'tile') {
+      // Puzzle tile slide click
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.value = 600 + Math.random() * 200;
+      o.type = 'sine';
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.1);
+    }
+
+    else if (type === 'win') {
+      // Victory chime — ascending arpeggio
+      [523, 659, 784, 1047].forEach((f, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = f; o.type = 'sine';
+        const t = now + i * 0.12;
+        g.gain.setValueAtTime(0.3, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+        o.connect(g); g.connect(master);
+        o.start(t); o.stop(t + 0.5);
+        // Shimmer overtone
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.frequency.value = f * 2; o2.type = 'sine';
+        g2.gain.setValueAtTime(0.1, t);
+        g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        o2.connect(g2); g2.connect(master);
+        o2.start(t); o2.stop(t + 0.3);
+      });
+    }
+
+    else if (type === 'catch') {
+      // Heart caught — soft plop + sparkle
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.setValueAtTime(500, now);
+      o.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+      o.type = 'sine';
+      g.gain.setValueAtTime(0.25, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.15);
+      // twinkle
+      const o2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      o2.frequency.value = 1400 + Math.random() * 400; o2.type = 'sine';
+      g2.gain.setValueAtTime(0.1, now + 0.05);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      o2.connect(g2); g2.connect(master);
+      o2.start(now + 0.05); o2.stop(now + 0.2);
+    }
+
+    else if (type === 'dodge') {
+      // No button dodge — funny descending boop
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(600, now);
+      o.frequency.exponentialRampToValueAtTime(200, now + 0.2);
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.25);
+    }
+
+    else if (type === 'yes') {
+      // YES! — triumphant fanfare
+      const notes = [523, 659, 784, 1047, 1319, 1568];
+      notes.forEach((f, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = f; o.type = 'sine';
+        const t = now + i * 0.08;
+        g.gain.setValueAtTime(0.3, t);
+        g.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+        o.connect(g); g.connect(master);
+        o.start(t); o.stop(t + 0.6);
+      });
+      // Big shimmer chord at the end
+      [1047, 1319, 1568].forEach(f => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = f; o.type = 'triangle';
+        const t = now + 0.5;
+        g.gain.setValueAtTime(0.15, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+        o.connect(g); g.connect(master);
+        o.start(t); o.stop(t + 1.5);
+      });
+    }
+
+    else if (type === 'celebration') {
+      // Big celebration — cascading chimes
+      const scale = [523, 587, 659, 698, 784, 880, 988, 1047, 1175, 1319, 1397, 1568];
+      scale.forEach((f, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = f; o.type = 'sine';
+        const t = now + i * 0.07;
+        g.gain.setValueAtTime(0.2, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+        o.connect(g); g.connect(master);
+        o.start(t); o.stop(t + 0.8);
+      });
+    }
+
+    else if (type === 'whoosh') {
+      // Stage transition whoosh
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const filt = ctx.createBiquadFilter();
+      filt.type = 'bandpass';
+      filt.frequency.setValueAtTime(200, now);
+      filt.frequency.exponentialRampToValueAtTime(2000, now + 0.15);
+      filt.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+      filt.Q.value = 1;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.15, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      src.connect(filt); filt.connect(g); g.connect(master);
+      src.start(now); src.stop(now + 0.3);
+    }
+
+    else if (type === 'purr') {
+      // Cat purr — low rumble
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.value = 25; o.type = 'sawtooth';
+      const filt = ctx.createBiquadFilter();
+      filt.type = 'lowpass'; filt.frequency.value = 80;
+      g.gain.setValueAtTime(0.3, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+      o.connect(filt); filt.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.8);
+      // Add a tiny mew
+      const o2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      o2.type = 'sine';
+      o2.frequency.setValueAtTime(700, now + 0.2);
+      o2.frequency.exponentialRampToValueAtTime(500, now + 0.5);
+      g2.gain.setValueAtTime(0, now + 0.2);
+      g2.gain.linearRampToValueAtTime(0.12, now + 0.25);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      o2.connect(g2); g2.connect(master);
+      o2.start(now + 0.2); o2.stop(now + 0.5);
+    }
+
+    else if (type === 'adventure') {
+      // Magical story sound — twinkly
+      [880, 1175, 1397].forEach((f, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = f; o.type = 'sine';
+        const t = now + i * 0.06;
+        g.gain.setValueAtTime(0.12, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        o.connect(g); g.connect(master);
+        o.start(t); o.stop(t + 0.4);
+      });
+    }
+  } catch(e) {}
+}
+
+// ═══ INIT ═══
+window.addEventListener('load', () => {
+  createFloatingHearts(); addSparkles();
+  addFloatingPaws(); addWalkingCat(); addHeartOrbit(); spawnPawTrails();
+  setTimeout(() => $('loading').classList.add('hidden'), 1200);
+});
+</script>
+</body>
+</html>
