@@ -80,7 +80,7 @@ html, body {
 /* intro */
 #intro { background:linear-gradient(180deg,#0f1830,#243050); align-items:center; justify-content:flex-end; padding:6px; }
 #prof-canvas { image-rendering:pixelated; margin-bottom:auto; margin-top:12%; animation:bob 2s ease-in-out infinite; }
-/* dialog (shared, over world) */
+/* dialog */
 #dialog { justify-content:flex-end; padding:5px; background:transparent; pointer-events:none; z-index:20; }
 #dialog .dbox { pointer-events:auto; cursor:pointer; }
 .dbox {
@@ -104,16 +104,29 @@ html, body {
 #battle-arena { flex:1; position:relative; }
 .platform { position:absolute; background:radial-gradient(ellipse, #a8d088 0%, #98c078 70%, transparent 71%); }
 #plat-enemy { width:44%; height:14%; right:4%; top:34%; }
+#plat-ally { width:50%; height:12%; left:0; bottom:-2%; display:none; }
+#battle.duel #plat-ally { display:block; }
 #enemy-wrap { position:absolute; top:2%; right:8%; width:36%; text-align:center; }
 #enemy-sprite { width:100%; image-rendering:pixelated; filter:drop-shadow(2px 3px 0 rgba(26,40,24,.2)); animation:bob 1.6s ease-in-out infinite; }
 #enemy-wrap.hit { animation:hit .35s; }
 @keyframes hit { 0%,100%{transform:translateX(0)} 30%{transform:translateX(-8px)} 60%{transform:translateX(8px)} }
 #enemy-wrap.caught-anim { animation:suck .5s forwards; }
 @keyframes suck { to { transform:scale(0) rotate(360deg); opacity:0; } }
-#enemy-name {
-  position:absolute; top:4%; left:2%; background:#f8f8e8; border:2px solid #1a2818;
-  color:#1a2818; padding:5px 7px; border-radius:4px; font-size:clamp(6px,1.9vw,9px); max-width:54%;
+#ally-wrap { position:absolute; bottom:-2%; left:3%; width:38%; display:none; }
+#battle.duel #ally-wrap { display:block; }
+#ally-sprite { width:100%; image-rendering:pixelated; filter:drop-shadow(2px 3px 0 rgba(26,40,24,.2)); }
+#ally-wrap.hit { animation:hit .35s; }
+.hp-panel {
+  position:absolute; background:#f8f8e8; border:2px solid #1a2818; border-radius:4px;
+  padding:5px 7px; font-size:clamp(6px,1.8vw,9px); color:#1a2818; min-width:42%; z-index:2;
 }
+#enemy-panel { top:4%; left:2%; }
+#ally-panel { bottom:26%; right:2%; display:none; }
+#battle.duel #ally-panel { display:block; }
+.hp-track { height:5px; background:#d8d8c8; border:1px solid #1a2818; border-radius:2px; margin-top:4px; overflow:hidden; display:none; }
+#battle.duel .hp-track { display:block; }
+.hp-fill { height:100%; background:#4ac858; width:100%; transition:width .5s; }
+.hp-fill.mid { background:#e8b830; } .hp-fill.low { background:#e04838; }
 #ball { position:absolute; width:11%; bottom:6%; left:8%; opacity:0; pointer-events:none; z-index:3; image-rendering:pixelated; }
 #ball.throw { animation:throwBall .7s ease-in forwards; }
 @keyframes throwBall {
@@ -127,6 +140,8 @@ html, body {
 @keyframes popBall { to { transform:scale(1.8); opacity:0; } }
 #battle-menu { display:none; gap:5px; margin-top:5px; }
 #battle-menu.on { display:flex; }
+#moves-menu { display:none; grid-template-columns:1fr 1fr; gap:4px; margin-top:5px; }
+#moves-menu.on { display:grid; }
 .btn {
   flex:1; font-family:inherit; font-size:clamp(6px,1.9vw,9px);
   background:#1a2818; color:#c4e86b; border:none;
@@ -137,6 +152,7 @@ html, body {
 .btn img { width:11px; image-rendering:pixelated; }
 .btn:active { transform:translateY(2px); box-shadow:none; }
 .btn.pink { background:var(--rose); color:#fff; box-shadow:0 3px 0 #a12a4e; }
+.move-btn { font-size:clamp(5px,1.7vw,8px); padding:9px 3px; }
 /* flash */
 #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:30; }
 #flash.go { animation:flashA .12s 6; }
@@ -146,11 +162,12 @@ html, body {
 /* final */
 #final { align-items:center; text-align:center; padding:10px 10px 16px; overflow-y:auto;
   background:linear-gradient(180deg,#ffe4ec,#fff5f7); z-index:25; }
-#final h2 { color:var(--rose); font-size:clamp(11px,3.8vw,17px); line-height:1.65; margin:10px 0 4px; }
+#final h2 { color:var(--rose); font-size:clamp(11px,3.8vw,17px); line-height:1.65; margin:10px 0 2px; }
+#age-line { display:none; color:#b8860b; font-size:clamp(9px,2.8vw,13px); margin-top:2px; text-shadow:1px 1px 0 #fff; }
 #final .msg { color:#7a3b5e; font-size:clamp(7px,2.1vw,10px); line-height:1.9; margin:8px 4px; }
 #cake-wrap { position:relative; margin-top:8px; }
 #cake-canvas { image-rendering:pixelated; display:block; }
-.flame-zone { position:absolute; width:16%; height:34%; top:-12%; cursor:pointer; }
+.flame-zone { position:absolute; width:18%; height:34%; top:-12%; cursor:pointer; }
 #blow-hint { color:var(--rose); font-size:clamp(6px,1.9vw,9px); margin-top:12px; animation:blink 1.4s steps(2) infinite; }
 #pokedex-row { display:flex; gap:4px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:10px; }
 #pokedex-row img { width:clamp(28px,9vw,44px); image-rendering:pixelated; }
@@ -185,9 +202,9 @@ html, body {
         <div id="hud"><img id="hud-ball" alt=""><span id="dex-count">DEX 0/6</span></div>
 
         <div class="ov on" id="title">
-          <canvas id="title-cake" width="26" height="19"></canvas>
+          <canvas id="title-cake" width="26" height="21"></canvas>
           <h1>POKÉMON</h1>
-          <div class="sub">Édition Anniversaire<br>de Maria</div>
+          <div class="sub">Édition Anniversaire<br>26 ans de Maria</div>
           <div class="press">- APPUIE POUR JOUER -</div>
         </div>
 
@@ -203,8 +220,13 @@ html, body {
         <div class="ov" id="battle">
           <div id="battle-arena">
             <div class="platform" id="plat-enemy"></div>
-            <div id="enemy-name">???</div>
+            <div class="platform" id="plat-ally"></div>
+            <div class="hp-panel" id="enemy-panel"><span id="enemy-name">???</span>
+              <div class="hp-track"><div class="hp-fill" id="enemy-hp"></div></div></div>
             <div id="enemy-wrap"><img id="enemy-sprite" alt=""></div>
+            <div id="ally-wrap"><img id="ally-sprite" alt=""></div>
+            <div class="hp-panel" id="ally-panel"><span id="ally-name">???</span>
+              <div class="hp-track"><div class="hp-fill" id="ally-hp"></div></div></div>
             <img id="ball" alt="">
           </div>
           <div class="dbox"><span id="battle-text"></span></div>
@@ -212,22 +234,25 @@ html, body {
             <button class="btn pink" id="btn-throw"><img class="ball-icon" alt="">POKÉBALL</button>
             <button class="btn" id="btn-run">FUIR</button>
           </div>
+          <div id="moves-menu"></div>
         </div>
 
         <div class="ov" id="final">
           <div id="cake-wrap">
-            <canvas id="cake-canvas" width="26" height="22"></canvas>
-            <div class="flame-zone" style="left:11%;width:18%" data-c="0"></div>
-            <div class="flame-zone" style="left:36%;width:18%" data-c="1"></div>
-            <div class="flame-zone" style="left:63%;width:18%" data-c="2"></div>
+            <canvas id="cake-canvas" width="26" height="24"></canvas>
+            <div class="flame-zone" style="left:11%" data-c="0"></div>
+            <div class="flame-zone" style="left:36%" data-c="1"></div>
+            <div class="flame-zone" style="left:63%" data-c="2"></div>
           </div>
           <div id="blow-hint">Tape sur les bougies pour les souffler !</div>
           <h2 id="final-title" style="display:none">JOYEUX<br>ANNIVERSAIRE<br>MARIA !</h2>
+          <div id="age-line">26 ANS</div>
           <div id="photo-wrap"><img src="photo.jpg" alt="Nous deux"></div>
           <div class="msg" id="final-msg" style="display:none">
             Tu as capturé tous les Pokémon...<br>
             mais c'est toi la plus rare<br>et la plus précieuse.<br><br>
-            Je te souhaite une année<br>remplie de rires, d'aventures<br>et d'amour.<br><br>
+            Que tes 26 ans soient<br>ta plus belle année :<br>
+            remplie de rires, d'aventures<br>et d'amour.<br><br>
             Je t'aime.
             <div class="pixel-heart"></div>
           </div>
@@ -248,7 +273,7 @@ html, body {
         <button class="dbtn" id="d-right" data-dir="right">▶</button>
         <button class="dbtn" id="d-down" data-dir="down">▼</button>
       </div>
-      <div id="brand">GIRLFRIEND BOY<small>pour Maria</small></div>
+      <div id="brand">GAME BOY<small>BB BD EDITION</small></div>
       <div id="ab">
         <button class="abtn" id="btn-b">B</button>
         <button class="abtn" id="btn-a">A</button>
@@ -261,8 +286,9 @@ html, body {
 "use strict";
 const $ = s => document.querySelector(s);
 const wait = ms => new Promise(r => setTimeout(r, ms));
+const rand = (a,b) => a + Math.floor(Math.random()*(b-a+1));
 
-/* ══════════════════ AUDIO (chiptune) ══════════════════ */
+/* ══════════════════ AUDIO ══════════════════ */
 let AC = null;
 function audio(){ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume(); return AC; }
 function note(freq, t0, dur, vol=0.11, type='square'){
@@ -289,6 +315,10 @@ const sfx = {
   legend(){ [N.C4,N.E4,N.G4,N.C5,N.E5,N.G5].forEach((f,i)=>note(f,i*.12,.3,.09,'sawtooth')); },
   gate(){ [N.G4,N.C5,N.E5,N.G5,N.C6].forEach((f,i)=>note(f,i*.1,.18,.1)); },
   blow(){ note(N.C4,0,.15,.09,'triangle'); },
+  attack(){ note(N.E5,0,.06,.12,'sawtooth'); note(N.C5,.06,.08,.12,'sawtooth'); },
+  hurt(){ note(N.F4,0,.1,.1,'sawtooth'); note(N.D4,.1,.14,.1,'sawtooth'); },
+  heal(){ [N.C5,N.E5,N.G5].forEach((f,i)=>note(f,i*.08,.14,.08,'triangle')); },
+  crit(){ note(N.G5,0,.05,.13,'sawtooth'); note(N.C6,.05,.05,.13,'sawtooth'); note(N.E5,.1,.12,.13,'sawtooth'); },
 };
 function happyBirthday(){
   const seq = [
@@ -301,16 +331,16 @@ function happyBirthday(){
   seq.forEach(([f,d]) => { note(f,t,d*.42,.1); note(f/2,t,d*.42,.05,'triangle'); t += d*.45; });
 }
 
-/* ══════════════════ PIXEL ART ══════════════════ */
+/* ══════════════════ PIXEL SPRITES ══════════════════ */
 const PAL = {
   k:'#1a2818', h:'#6b4226', H:'#8a5a3a', s:'#f8c8a0', e:'#241a10',
   p:'#e84876', P:'#ff8fab', d:'#3a5a8a', b:'#4a3020',
-  g:'#e8e8e8', G:'#c8c8c8', w:'#ffffff', v:'#3a8a8a',
-  r:'#d83048', R:'#f8f8f8', l:'#cfd8e8', c:'#fff0f5', o:'#ff8c00', y:'#ffd700',
-  m:'#f4a8c0', M:'#e84876', W:'#fffef8',
+  g:'#e8e8e8', w:'#ffffff', v:'#3a8a8a',
+  r:'#d83048', W:'#fffef8', l:'#cfd8e8', c:'#fff0f5', o:'#ff8c00', y:'#ffd700',
+  m:'#f4a8c0', M:'#e84876',
 };
 function spriteCanvas(rows, scale=1){
-  const h = rows.length, w = rows[0].length;
+  const h = rows.length, w = Math.max(...rows.map(r=>r.length));
   const cv = document.createElement('canvas');
   cv.width = w*scale; cv.height = h*scale;
   const ctx = cv.getContext('2d');
@@ -321,7 +351,7 @@ function spriteCanvas(rows, scale=1){
   }});
   return cv;
 }
-/* player 12x15 — down/up/side, A=stand B=step */
+/* Maria 12x15 */
 const SPR_DOWN_A = [
 '...kkkkkk...',
 '..khhhhhhk..',
@@ -339,23 +369,12 @@ const SPR_DOWN_A = [
 '..kss..ssk..',
 '..kbb..bbk..',
 ];
-const SPR_DOWN_B = [
-'...kkkkkk...',
-'..khhhhhhk..',
-'.khhhhhhhhk.',
-'.khhhhhhhhk.',
-'.khsssssshk.',
-'.khsessesk..',
-'..kssssssk..',
-'..kppppppk..',
-'.kspppppssk.',
-'.kspppppssk.',
-'..kppppppk..',
+const SPR_DOWN_B = SPR_DOWN_A.slice(0,11).concat([
 '..kddddddk..',
 '..kddddddk..',
 '...kssssk...',
 '...kbbbbk...',
-];
+]);
 const SPR_UP_A = [
 '...kkkkkk...',
 '..khhhhhhk..',
@@ -402,25 +421,42 @@ const SPR_SIDE_B = SPR_SIDE_A.slice(0,11).concat([
 '.kss...ssk..',
 '.kbb...bbk..',
 ]);
-/* professor 14x17 */
+/* Professeur Nassime — portrait 14x17 : cheveux longs bruns + moustache */
 const SPR_PROF = [
 '....kkkkkk....',
-'...kggggggk...',
-'..kggggggggk..',
-'..kggggggggk..',
-'..kgsssssssk..',
-'..kgse.ss.ek..',
-'..kgssssssgk..',
-'...kssggssk...',
-'..kwwwwwwwwk..',
-'.kwwvvvvvvwwk.',
-'.kwwvvvvvvwwk.',
-'.kswwvvvvwwsk.',
+'...khhhhhhk...',
+'..khhhhhhhhk..',
+'..khhhhhhhhk..',
+'..khhssssshk..',
+'..khsesseshk..',
+'..khsbbbbshk..',
+'..khhsssshhk..',
+'..khwwwwwwhk..',
+'.khhwvvvvwhhk.',
+'.khhwvvvvwhhk.',
+'..kswwwwwwsk..',
 '..kwwwwwwwwk..',
 '..kwwwwwwwwk..',
 '...kdd..ddk...',
 '...kdd..ddk...',
 '...kbb..bbk...',
+];
+/* Nassime overworld 12x14 */
+const SPR_NPC = [
+'...kkkkkk...',
+'..khhhhhhk..',
+'.khhhhhhhhk.',
+'.khhsssshhk.',
+'.khsessehk..',
+'.khsbbbshk..',
+'.khhssshhk..',
+'.khwwwwwwhk.',
+'.khwvvvvwhk.',
+'.kswwwwwwsk.',
+'..kwwwwwwk..',
+'..kdd..ddk..',
+'..kdd..ddk..',
+'..kbb..bbk..',
 ];
 /* pokeball 12x11 */
 const SPR_BALL = [
@@ -436,7 +472,7 @@ const SPR_BALL = [
 '..kWWWWWWk..',
 '...kkkkkk...',
 ];
-/* cake 26x22 : 3 candles + 2 layers + plate */
+/* gateau 26x21 — avec "26" ecrit sur la base */
 const SPR_CAKE = [
 '.....y.....y......y.......',
 '.....o.....o......o.......',
@@ -446,19 +482,21 @@ const SPR_CAKE = [
 '.kmmmmmmmmmmmmmmmmmmmmmk..',
 '.kmWmWmWmWmWmWmWmWmWmWmk..',
 '.kWWWWWWWWWWWWWWWWWWWWWk..',
-'.kWWWWWWWWWWWWWWWWWWWWWk..',
 '..kkkkkkkkkkkkkkkkkkkkk...',
 '.kMMMMMMMMMMMMMMMMMMMMMk..',
 '.kMmMmMmMmMmMmMmMmMmMmMk..',
 'kWWWWWWWWWWWWWWWWWWWWWWWk.',
-'kWWWWWWWWWWWWWWWWWWWWWWWk.',
-'kWWWWWWWWWWWWWWWWWWWWWWWk.',
+'kWWWWWWWWMMMWMMMWWWWWWWWk.',
+'kWWWWWWWWWWMWMWWWWWWWWWWk.',
+'kWWWWWWWWMMMWMMMWWWWWWWWk.',
+'kWWWWWWWWMWWWMWMWWWWWWWWk.',
+'kWWWWWWWWMMMWMMMWWWWWWWWk.',
 '.kkkkkkkkkkkkkkkkkkkkkkk..',
 'kllllllllllllllllllllllllk',
 '.kllllllllllllllllllllllk.',
 '..kkkkkkkkkkkkkkkkkkkkkk..',
 ];
-/* small cake on altar 12x10 */
+/* petit gateau d'autel 12x10 */
 const SPR_CAKE_S = [
 '..y..y..y...',
 '..c..c..c...',
@@ -479,10 +517,12 @@ function makeTile(draw){
   draw(cv.getContext('2d')); return cv;
 }
 function rect(ctx,c,x,y,w,h){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); }
-const T_GRASS = makeTile(ctx => {
-  rect(ctx,'#8ed86a',0,0,16,16);
+function grassTile(shade){ return makeTile(ctx => {
+  rect(ctx, shade ? '#88d264' : '#8ed86a', 0,0,16,16);
   [[2,3],[7,1],[12,4],[4,9],[10,11],[14,13],[1,14],[8,7],[13,8]].forEach(([x,y])=>rect(ctx,'#7ac858',x,y,2,1));
-});
+  rect(ctx,'#9ce276',5,12,1,1); rect(ctx,'#9ce276',11,2,1,1);
+});}
+const T_GRASSV = [grassTile(0), grassTile(1)];
 function tallGrassTile(f){ return makeTile(ctx => {
   rect(ctx,'#7ac858',0,0,16,16);
   ctx.fillStyle = '#3e8e41';
@@ -494,15 +534,21 @@ function tallGrassTile(f){ return makeTile(ctx => {
   }
   ctx.fillStyle = '#2e6e31';
   for(let i=0;i<4;i++) ctx.fillRect(i*4+1, 12, 3, 3);
+  ctx.fillStyle = '#5aac50';
+  ctx.fillRect(2+sway, 3, 1, 2); ctx.fillRect(10-sway, 5, 1, 2);
 });}
 const T_TALL = [tallGrassTile(0), tallGrassTile(1)];
 const T_TREE = makeTile(ctx => {
-  rect(ctx,'#8ed86a',0,0,16,16);
-  rect(ctx,'#1a3818',1,0,14,12);
-  rect(ctx,'#2e6e31',2,0,12,11);
-  rect(ctx,'#3e8e41',3,1,10,6);
-  [[4,2],[8,1],[11,3],[5,5],[9,4]].forEach(([x,y])=>rect(ctx,'#5aac50',x,y,2,2));
-  rect(ctx,'#4a3020',6,11,4,5); rect(ctx,'#5a4028',7,11,2,5);
+  ctx.drawImage(T_GRASSV[0],0,0);
+  rect(ctx,'#1a3818',2,1,12,10);
+  rect(ctx,'#1a3818',4,0,8,2);
+  rect(ctx,'#2e6e31',3,2,10,8);
+  rect(ctx,'#2e6e31',5,1,6,1);
+  rect(ctx,'#3e8e41',4,2,8,5);
+  rect(ctx,'#5aac50',5,2,4,2); rect(ctx,'#5aac50',10,3,2,2);
+  rect(ctx,'#1a3818',5,10,6,1);
+  rect(ctx,'#4a3020',6,11,4,4); rect(ctx,'#6a4a30',7,11,2,4);
+  rect(ctx,'#1a2818',5,15,8,1);
 });
 function waterTile(f){ return makeTile(ctx => {
   rect(ctx,'#4a98d8',0,0,16,16);
@@ -512,14 +558,20 @@ function waterTile(f){ return makeTile(ctx => {
   ctx.fillRect(3+o,10,4,1); ctx.fillRect(10-o,13,4,1);
   ctx.fillStyle = '#a8d8f8';
   ctx.fillRect(2+o,3,2,1); ctx.fillRect(10+o,6,2,1);
+  ctx.fillRect(f?13:5, f?2:8, 1, 1);
 });}
 const T_WATER = [waterTile(0), waterTile(1)];
+const T_SAND = makeTile(ctx => {
+  rect(ctx,'#f0e0b0',0,0,16,16);
+  [[3,2],[9,5],[13,3],[5,8],[11,11],[2,12],[7,14],[14,9]].forEach(([x,y])=>rect(ctx,'#d8c088',x,y,2,1));
+});
 const T_PATH = makeTile(ctx => {
   rect(ctx,'#e8d8a0',0,0,16,16);
   [[3,2],[9,5],[13,3],[5,8],[11,11],[2,12],[7,14]].forEach(([x,y])=>rect(ctx,'#d0b878',x,y,2,1));
+  rect(ctx,'#f4e8bc',6,6,2,1); rect(ctx,'#f4e8bc',12,13,1,1);
 });
 function flowerTile(f){ return makeTile(ctx => {
-  ctx.drawImage(T_GRASS,0,0);
+  ctx.drawImage(T_GRASSV[0],0,0);
   const sway = f ? 1 : 0;
   rect(ctx,'#3e8e41',7,9,1,4);
   rect(ctx,'#ff8fab',5+sway,5,2,2); rect(ctx,'#ff8fab',8+sway,5,2,2);
@@ -529,14 +581,14 @@ function flowerTile(f){ return makeTile(ctx => {
 });}
 const T_FLOWER = [flowerTile(0), flowerTile(1)];
 const T_FENCE = makeTile(ctx => {
-  ctx.drawImage(T_GRASS,0,0);
+  ctx.drawImage(T_GRASSV[0],0,0);
   rect(ctx,'#1a2818',0,4,16,1); rect(ctx,'#b08040',0,5,16,3);
   rect(ctx,'#1a2818',0,8,16,1); rect(ctx,'#b08040',0,9,16,2); rect(ctx,'#1a2818',0,11,16,1);
   rect(ctx,'#8a6030',1,3,3,11); rect(ctx,'#1a2818',1,2,3,1);
   rect(ctx,'#8a6030',12,3,3,11); rect(ctx,'#1a2818',12,2,3,1);
 });
 const T_SIGN = makeTile(ctx => {
-  ctx.drawImage(T_GRASS,0,0);
+  ctx.drawImage(T_GRASSV[0],0,0);
   rect(ctx,'#4a3020',7,9,2,6);
   rect(ctx,'#1a2818',2,2,12,7); rect(ctx,'#c89858',3,3,10,5);
   rect(ctx,'#8a6030',4,4,8,1); rect(ctx,'#8a6030',4,6,6,1);
@@ -550,78 +602,122 @@ const T_ALTAR = makeTile(ctx => {
   ctx.drawImage(T_STONE,0,0);
   rect(ctx,'#1a2818',1,3,14,12); rect(ctx,'#a8a8b4',2,4,12,10); rect(ctx,'#8a8a98',2,12,12,2);
 });
+const T_ROOF = makeTile(ctx => {
+  rect(ctx,'#c92f5d',0,0,16,16);
+  rect(ctx,'#ff8fab',0,1,16,2); rect(ctx,'#e84876',0,5,16,2);
+  rect(ctx,'#ff8fab',0,9,16,2); rect(ctx,'#e84876',0,13,16,2);
+  rect(ctx,'#1a2818',0,0,16,1);
+});
+const T_WALL = makeTile(ctx => {
+  rect(ctx,'#f8f0d8',0,0,16,16);
+  rect(ctx,'#1a2818',0,0,16,1);
+  rect(ctx,'#d8c8a0',0,1,1,15); rect(ctx,'#d8c8a0',15,1,1,15);
+  rect(ctx,'#1a2818',5,4,6,6); rect(ctx,'#78bcf0',6,5,4,4); rect(ctx,'#f8f8ff',6,5,2,1);
+  rect(ctx,'#d8c8a0',0,13,16,1);
+});
+const T_DOOR = makeTile(ctx => {
+  rect(ctx,'#f8f0d8',0,0,16,16);
+  rect(ctx,'#1a2818',0,0,16,1);
+  rect(ctx,'#1a2818',4,4,8,12); rect(ctx,'#8a5a30',5,5,6,11);
+  rect(ctx,'#6a4020',5,5,6,2); rect(ctx,'#ffd700',9,10,1,2);
+});
+const T_ROCK = makeTile(ctx => {
+  ctx.drawImage(T_GRASSV[0],0,0);
+  rect(ctx,'#1a2818',3,5,10,9);
+  rect(ctx,'#98989c',4,6,8,7);
+  rect(ctx,'#c0c0c8',5,7,3,2);
+  rect(ctx,'#6a6a70',4,11,8,2);
+});
 
 /* ══════════════════ MAP ══════════════════ */
-const MAP_W = 24, MAP_H = 20;
-/* A=tree .=grass t=tall w=water p=path f=flower F=fence s=sign S=stone C=altar G=gate */
+const MAP_W = 28, MAP_H = 24;
+/* A arbre . herbe t hautes-herbes w eau b sable p chemin f fleur F barriere
+   s panneau S dalle C autel G portail N Nassime R toit W mur D porte o rocher */
 let MAP = [
-'AAAAAAAAAAAAAAAAAAAAAAAA',
-'AAAAAAAAASSSSSSAAAAAAAAA',
-'AAAAAAAAASSCSSSAAAAAAAAA',
-'AAAAAAAAASSSSSSAAAAAAAAA',
-'AAAAAAAFFFFGGFFFFAAAAAAA',
-'A......ttt.pp.ttt......A',
-'A..AA..ttt.pp.ttt..AA..A',
-'A..AA...t..pp..t...AA..A',
-'A.ff.......pp.......ff.A',
-'A.ff..ttt..pp..ttt..ff.A',
-'A.....ttt..pp..ttt.....A',
-'A.....ttt..pp..tt.wwww.A',
-'A..A.......pp.....wwww.A',
-'A.ttt......pp..f..wwww.A',
-'A.ttt..s...pp......ww..A',
-'A.ttt......pp..ttt.....A',
-'A......ff..pp..ttt..A..A',
-'A..tt......pp..ttt.....A',
-'A......f...pp....s.....A',
-'AAAAAAAAAAAAAAAAAAAAAAAA',
+'AAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+'AAAAAAAAAASSSSSSSSAAAAAAAAAA',
+'AAAAAAAAAASSSCSSSSAAAAAAAAAA',
+'AAAAAAAAAASSSNSSSSAAAAAAAAAA',
+'AAAAAAAAAASSSSSSSSAAAAAAAAAA',
+'AAAAAAAAFFFFFGGFFFFFAAAAAAAA',
+'A.......ttt..pp..ttt.......A',
+'A..AA...ttt..pp..ttt...AA..A',
+'A..AA....t...pp...t....AA..A',
+'A.ff.ff......pp....t.ttt...A',
+'A.fffffff....pp....t.ttt...A',
+'A.fffffff....pp..........o.A',
+'A..fffff.....pp...ttt......A',
+'A...fff......pp...ttt......A',
+'A....f.......pp...ttt..o...A',
+'A............pp............A',
+'A..ttt...RRR.pp....s.......A',
+'A..ttt...WDW.pp............A',
+'A..ttt.......pp....bbbbbb..A',
+'A............pp....bwwwwb..A',
+'A...s........pp....bwwwwb..A',
+'A.ff.........pp....bwwwwb..A',
+'A.ff..tt.....pp....bbbbbb..A',
+'AAAAAAAAAAAAAAAAAAAAAAAAAAAA',
 ].map(r => (r + 'A'.repeat(MAP_W)).slice(0, MAP_W));
-const SOLID = new Set(['A','w','F','s','C','G']);
+const SOLID = new Set(['A','w','F','s','C','G','N','R','W','D','o']);
 const tileAt = (x,y) => (x<0||y<0||x>=MAP_W||y>=MAP_H) ? 'A' : MAP[y][x];
-function setTile(x,y,ch){ MAP[y] = MAP[y].slice(0,x) + ch + MAP[y].slice(x+1); }
+const NPC_POS = { x:13, y:3 };
 
 const SIGNS = {
-  '7,14': "ROUTE MARIA - Ici commence l'aventure de la meilleure dresseuse du monde !",
-  '17,18': "Panneau : « Sanctuaire du Gâteau au nord. Seule une championne au cœur pur peut y entrer. »",
+  '19,16': "Panneau : « Sanctuaire du Gâteau au nord. Le Professeur NASSIME y prépare quelque chose de spécial... »",
+  '4,20': "ROUTE MARIA - Ici commence l'aventure de la meilleure dresseuse du monde !",
 };
 
 /* ══════════════════ DATA ══════════════════ */
 const SPRITE_URL = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+const BACK_URL = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`;
 const POKEMON = [
   { id:25,  name:'PIKACHU',   msg:"PIKACHU te souhaite une année électrisante, pleine d'étincelles !" },
   { id:133, name:'ÉVOLI',     msg:"ÉVOLI t'offre tout son amour pour ta nouvelle année !" },
   { id:39,  name:'RONDOUDOU', msg:"RONDOUDOU chante « joyeux anniversaire » rien que pour toi !" },
-  { id:4,   name:'SALAMÈCHE', msg:"SALAMÈCHE promet d'allumer les bougies de ton gâteau !" },
+  { id:4,   name:'SALAMÈCHE', msg:"SALAMÈCHE promet d'allumer les 26 bougies de ton gâteau !" },
   { id:7,   name:'CARAPUCE',  msg:"CARAPUCE te souhaite que tous tes vœux coulent de source !" },
   { id:1,   name:'BULBIZARRE',msg:"BULBIZARRE fait pousser un bouquet de fleurs pour ta fête !" },
 ];
 const GOAL = POKEMON.length;
 const LEGENDARY = { id:null, name:'GÂTEAUCHU' };
+const MOVES = [
+  { name:'ÉCLAIR CÂLIN', min:17, max:26 },
+  { name:'BISOU CRITIQUE', min:11, max:20, crit:0.4, critMul:2 },
+  { name:'REGARD MIGNON', heal:28 },
+  { name:'DANSE CONFETTIS', min:15, max:28 },
+];
+const ENEMY_MOVES = [
+  { name:'JET DE GLAÇAGE', min:9, max:16 },
+  { name:'BOUGIES ARDENTES', min:11, max:18 },
+  { name:'ROULADE FORÊT-NOIRE', min:7, max:22 },
+];
 
 /* ══════════════════ STATE ══════════════════ */
 const game = {
-  mode:'title',           // title | intro | world | dialog | battle | final
+  mode:'title',
   caught:[], stepsInGrass:0, gateOpen:false, legendaryCaught:false,
-  battle:{ pkm:null, throws:0, legendary:false, busy:false },
+  battle:{ pkm:null, throws:0, busy:false },
+  duel:null,
 };
-const player = { x:11, y:17, dir:'down', moving:false, prog:0, tx:11, ty:17, frame:0 };
+const player = { x:13, y:20, dir:'up', moving:false, prog:0, tx:13, ty:20, frame:0 };
 const held = new Set();
 let camX = 0, camY = 0, clock = 0;
 
-/* sprites prepared */
 const SPRITES = {
   down:[spriteCanvas(SPR_DOWN_A), spriteCanvas(SPR_DOWN_B)],
   up:[spriteCanvas(SPR_UP_A), spriteCanvas(SPR_UP_B)],
   side:[spriteCanvas(SPR_SIDE_A), spriteCanvas(SPR_SIDE_B)],
 };
 const CAKE_S_CV = spriteCanvas(SPR_CAKE_S);
+const NPC_CV = spriteCanvas(SPR_NPC);
 const BALL_URL = spriteCanvas(SPR_BALL, 4).toDataURL();
+const BALL_BIG = spriteCanvas(SPR_BALL, 8).toDataURL();
 $('#ball').src = BALL_URL;
 $('#hud-ball').src = BALL_URL;
 document.querySelectorAll('.ball-icon').forEach(i => i.src = BALL_URL);
-/* title cake + prof */
 $('#title-cake').getContext('2d').drawImage(spriteCanvas(SPR_CAKE),0,0);
-(() => { const c=$('#title-cake'); c.style.width='90px'; c.style.height='auto';
+(() => { const c=$('#title-cake'); c.style.width='96px'; c.style.height='auto';
   const p=$('#prof-canvas'); p.getContext('2d').drawImage(spriteCanvas(SPR_PROF),0,0);
   p.style.width='72px'; p.style.height='auto'; })();
 
@@ -639,31 +735,43 @@ function drawWorld(){
   const x0 = Math.floor(camX/TS), y0 = Math.floor(camY/TS);
   for(let y=y0; y<=y0+Math.ceil(VIEW_H/TS); y++){
     for(let x=x0; x<=x0+Math.ceil(VIEW_W/TS); x++){
-      const ch = tileAt(x,y), dx = x*TS-camX, dy = y*TS-camY;
-      let tile = T_GRASS;
+      const ch = tileAt(x,y), dx = Math.round(x*TS-camX), dy = Math.round(y*TS-camY);
+      let tile = T_GRASSV[(x+y)%2];
       switch(ch){
         case 'A': tile = T_TREE; break;
         case 't': tile = T_TALL[(x+y+animF)%2]; break;
         case 'w': tile = T_WATER[animF]; break;
+        case 'b': tile = T_SAND; break;
         case 'p': tile = T_PATH; break;
         case 'f': tile = T_FLOWER[animF]; break;
         case 'F': tile = T_FENCE; break;
         case 's': tile = T_SIGN; break;
-        case 'S': tile = T_STONE; break;
+        case 'S': case 'N': tile = T_STONE; break;
         case 'C': tile = T_ALTAR; break;
         case 'G': tile = game.gateOpen ? T_STONE : T_FENCE; break;
+        case 'R': tile = T_ROOF; break;
+        case 'W': tile = T_WALL; break;
+        case 'D': tile = T_DOOR; break;
+        case 'o': tile = T_ROCK; break;
       }
-      wctx.drawImage(tile, Math.round(dx), Math.round(dy));
+      wctx.drawImage(tile, dx, dy);
       if(ch === 'C' && !game.legendaryCaught){
-        wctx.drawImage(CAKE_S_CV, Math.round(dx+2), Math.round(dy-4+ (animF?0:-1)));
+        wctx.drawImage(CAKE_S_CV, dx+2, dy-4+(animF?0:-1));
+      }
+      if(ch === 'N'){
+        wctx.fillStyle = 'rgba(26,40,24,.25)';
+        wctx.fillRect(dx+3, dy+13, 10, 2);
+        wctx.drawImage(NPC_CV, dx+2, dy);
       }
     }
   }
-  /* player */
+  /* ombre + joueuse */
+  const sx = Math.round(px - camX + 2), sy = Math.round(py - camY - 1);
+  wctx.fillStyle = 'rgba(26,40,24,.25)';
+  wctx.fillRect(sx+1, sy+14, 10, 2);
   const dirKey = (player.dir==='left'||player.dir==='right') ? 'side' : player.dir;
   const frame = player.moving ? (Math.floor(player.prog*2)+player.frame)%2 : 0;
   const spr = SPRITES[dirKey][frame];
-  const sx = Math.round(px - camX + 2), sy = Math.round(py - camY - 1);
   if(player.dir === 'left'){
     wctx.save(); wctx.translate(sx+12, sy); wctx.scale(-1,1); wctx.drawImage(spr,0,0); wctx.restore();
   } else {
@@ -673,7 +781,7 @@ function drawWorld(){
 function dirDX(d){ return d==='left'?-1:d==='right'?1:0; }
 function dirDY(d){ return d==='up'?-1:d==='down'?1:0; }
 
-/* ══════════════════ GAME LOOP ══════════════════ */
+/* ══════════════════ LOOP ══════════════════ */
 let last = performance.now();
 function loop(now){
   const dt = Math.min(50, now - last); last = now; clock += dt;
@@ -762,17 +870,28 @@ function interact(){
   if(t === 's'){
     sfx.select();
     showDialog([SIGNS[fx+','+fy] || 'Panneau illisible...']);
+  } else if(t === 'N'){
+    meetNassime();
   } else if(t === 'C' && !game.legendaryCaught){
-    if(game.caught.length >= GOAL){
-      startLegendary();
-    } else {
-      sfx.select();
-      showDialog(["Un délicieux gâteau repose sur l'autel... mais une force le protège encore. (" + game.caught.length + '/' + GOAL + ' POKÉMON capturés)']);
-    }
+    sfx.select();
+    showDialog(["Un magnifique gâteau repose sur l'autel... Le Professeur NASSIME le surveille de près."]);
   }
 }
+function meetNassime(){
+  sfx.select();
+  if(game.legendaryCaught) return;
+  if(game.caught.length < GOAL){
+    showDialog(["NASSIME : Salut championne ! Reviens me voir quand tu auras capturé les 6 POKÉMON de la route..."]);
+    return;
+  }
+  showDialog([
+    "NASSIME : Te voilà enfin, MARIA !",
+    "NASSIME : Pour tes 26 ans, j'ai dressé le POKÉMON le plus rare du monde... GÂTEAUCHU !",
+    "NASSIME : Mais un tel trésor, ça se mérite ! Je te défie en duel, championne !",
+  ], () => startDuel());
+}
 
-/* ══════════════════ TYPEWRITER / DIALOG ══════════════════ */
+/* ══════════════════ DIALOG ══════════════════ */
 let typing = null, skipTyping = null;
 function type(el, text){
   return new Promise(res => {
@@ -790,7 +909,6 @@ let dialogQueue = [], dialogBusy = false, dialogDone = null;
 $('#dialog').addEventListener('click', () => advanceDialog());
 function showDialog(lines, onDone){
   if(game.mode === 'dialog'){
-    /* a dialog is already open: append lines and chain callbacks */
     dialogQueue.push(...lines);
     const prev = dialogDone;
     dialogDone = () => { if(prev) prev(); if(onDone) onDone(); };
@@ -807,6 +925,7 @@ async function nextDialogLine(){
   dialogBusy = false;
 }
 function advanceDialog(){
+  if(game.mode !== 'dialog') return;
   if(dialogBusy){ if(skipTyping) skipTyping(); return; }
   sfx.select();
   if(dialogQueue.length) return nextDialogLine();
@@ -828,10 +947,10 @@ function startIntro(){
 }
 const INTRO = [
   "Bonjour MARIA ! Bienvenue dans le monde des POKÉMON !",
-  "Je suis le Professeur... euh... ton amoureux, en blouse de scientifique.",
-  "Aujourd'hui n'est pas un jour comme les autres : c'est TON jour.",
-  "La légende dit qu'un POKÉMON unique s'éveille chaque année à ton anniversaire, dans le Sanctuaire au nord.",
-  "Mais la barrière ne s'ouvrira qu'à une dresseuse d'exception : capture les 6 POKÉMON de la route !",
+  "Je suis le Professeur NASSIME. Oui oui, le vrai, moustache comprise.",
+  "Aujourd'hui n'est pas un jour comme les autres : tu as 26 ans !",
+  "La légende dit qu'un POKÉMON unique s'éveille le jour de ton anniversaire, dans le Sanctuaire au nord...",
+  "Mais sa barrière ne s'ouvre qu'aux dresseuses d'exception : capture les 6 POKÉMON de la route !",
   "Marche dans les hautes herbes pour les trouver. Bonne chance, championne !",
 ];
 let introStep = 0, introBusy = false;
@@ -855,21 +974,22 @@ function advanceIntro(){
 }
 function updateHud(){ $('#dex-count').textContent = `DEX ${game.caught.length}/${GOAL}`; }
 
-/* ══════════════════ BATTLE ══════════════════ */
-async function startBattle(pkm, legendary){
+/* ══════════════════ CAPTURE (herbes) ══════════════════ */
+async function startBattle(pkm, isDuelIntro){
   game.mode = 'battle';
-  game.battle = { pkm, throws:0, legendary, busy:true };
+  game.battle = { pkm, throws:0, busy:true };
   sfx.encounter();
   $('#flash').classList.add('go');
   await wait(700);
   $('#flash').classList.remove('go');
   $('#battle').classList.add('on');
+  if(!isDuelIntro) $('#battle').classList.remove('duel');
   $('#battle-menu').classList.remove('on');
+  $('#moves-menu').classList.remove('on');
   $('#ball').className = '';
   const img = $('#enemy-sprite');
   if(pkm.id){
-    /* placeholder pixel pokeball immediately, real sprite swapped in on load */
-    img.src = spriteCanvas(SPR_BALL, 8).toDataURL();
+    img.src = BALL_BIG;
     const pre = new Image();
     pre.onload = () => { if(game.battle.pkm === pkm) img.src = pre.src; };
     pre.src = SPRITE_URL(pkm.id);
@@ -877,10 +997,9 @@ async function startBattle(pkm, legendary){
     img.src = spriteCanvas(SPR_CAKE, 6).toDataURL();
   }
   $('#enemy-wrap').className = '';
-  $('#enemy-name').textContent = pkm.name + (legendary ? ' *' : '');
-  await type($('#battle-text'), legendary
-    ? "Le POKÉMON légendaire GÂTEAUCHU se dresse devant toi ! Il sent bon le sucre..."
-    : `Un ${pkm.name} sauvage apparaît !`);
+  $('#enemy-name').textContent = pkm.name;
+  if(isDuelIntro) return; /* le duel gère la suite */
+  await type($('#battle-text'), `Un ${pkm.name} sauvage apparaît !`);
   $('#battle-menu').classList.add('on');
   game.battle.busy = false;
 }
@@ -889,9 +1008,9 @@ $('#btn-run').addEventListener('click', runAway);
 async function runAway(){
   const b = game.battle;
   if(b.busy) return;
-  if(b.legendary){
+  if(game.duel){
     b.busy = true;
-    await type($('#battle-text'), "Impossible de fuir ! GÂTEAUCHU veut fêter ton anniversaire !");
+    await type($('#battle-text'), "Fuir ?! Et rater ton propre gâteau d'anniversaire ? Jamais !");
     b.busy = false;
     return;
   }
@@ -915,12 +1034,20 @@ async function throwBall(){
   ball.className = 'wobble';
   for(let i=0;i<3;i++){ sfx.wobble(); await wait(500); }
   ball.className = 'rest';
-  const caught = b.legendary ? b.throws >= 3 : (b.throws >= 2 || Math.random() < 0.7);
+  const caught = game.duel ? true : (b.throws >= 2 || Math.random() < 0.7);
   if(caught){
     sfx.catch();
     await type($('#battle-text'), `Et hop ! ${b.pkm.name} est capturé !`);
     await wait(900);
-    if(b.legendary){ game.legendaryCaught = true; finishGame(); return; }
+    if(game.duel){
+      await type($('#battle-text'), "GÂTEAUCHU est à toi... pour la vie !");
+      await wait(1600);
+      await type($('#battle-text'), "NASSIME : Joyeux anniversaire, mon amour.");
+      await wait(2200);
+      game.legendaryCaught = true;
+      finishGame();
+      return;
+    }
     game.caught.push(b.pkm.id);
     updateHud();
     await type($('#battle-text'), b.pkm.msg);
@@ -933,22 +1060,19 @@ async function throwBall(){
     ball.className = 'pop';
     $('#enemy-wrap').classList.remove('caught-anim');
     $('#enemy-wrap').classList.add('hit');
-    await type($('#battle-text'), b.legendary
-      ? (b.throws === 1 ? "Oh non ! GÂTEAUCHU résiste ! Il est coriace, ce gâteau !"
-                        : "Presque ! Ses bougies vacillent, encore un effort !")
-      : `Mince ! ${b.pkm.name} s'est libéré ! Réessaie !`);
+    await type($('#battle-text'), `Mince ! ${b.pkm.name} s'est libéré ! Réessaie !`);
     $('#enemy-wrap').classList.remove('hit');
     $('#battle-menu').classList.add('on');
     b.busy = false;
   }
 }
 function endBattle(){
-  $('#battle').classList.remove('on');
+  $('#battle').classList.remove('on','duel');
   game.mode = 'world';
   game.battle.busy = false;
 }
 
-/* ══════════════════ GATE / LEGENDARY ══════════════════ */
+/* ══════════════════ OUVERTURE DU SANCTUAIRE ══════════════════ */
 async function gateOpening(){
   await wait(400);
   sfx.legend();
@@ -960,13 +1084,122 @@ async function gateOpening(){
   showDialog([
     "Le sol tremble... !!",
     "La barrière du Sanctuaire vient de s'ouvrir, tout au nord de la route !",
-    "Une délicieuse odeur de gâteau se répand... Va voir l'autel !",
+    "Quelqu'un t'y attend...",
   ]);
 }
-function startLegendary(){
-  showDialog(["Le gâteau sur l'autel se met à briller...", "Il... il BOUGE ?!"], () => {
-    startBattle(LEGENDARY, true);
+
+/* ══════════════════ DUEL vs NASSIME ══════════════════ */
+function updateBars(){
+  const d = game.duel; if(!d) return;
+  const set = (el, hp, max) => {
+    const pct = Math.max(0, hp/max*100);
+    el.style.width = (hp>0 && pct<3 ? 3 : pct) + '%';
+    el.className = 'hp-fill' + (pct<=25 ? ' low' : pct<=50 ? ' mid' : '');
+  };
+  set($('#enemy-hp'), d.enemyHP, d.enemyMax);
+  set($('#ally-hp'), d.allyHP, d.allyMax);
+}
+async function startDuel(){
+  const allyId = game.caught[0] || 25;
+  const ally = POKEMON.find(p => p.id === allyId) || POKEMON[0];
+  game.duel = { enemyHP:110, enemyMax:110, allyHP:90, allyMax:90, ally, capturePhase:false, survived:false };
+  await startBattle(LEGENDARY, true);
+  $('#battle').classList.add('duel');
+  $('#enemy-name').textContent = 'GÂTEAUCHU Nv.26';
+  $('#ally-name').textContent = ally.name + ' Nv.26';
+  const aimg = $('#ally-sprite');
+  aimg.src = BALL_BIG;
+  const pre = new Image();
+  pre.onload = () => { aimg.src = pre.src; };
+  pre.src = BACK_URL(ally.id);
+  updateBars();
+  buildMoves();
+  await type($('#battle-text'), 'Le Professeur NASSIME veut se battre !');
+  await wait(1200);
+  await type($('#battle-text'), 'NASSIME envoie GÂTEAUCHU Nv.26 !');
+  await wait(1200);
+  await type($('#battle-text'), `En avant, ${ally.name} !`);
+  await wait(800);
+  $('#moves-menu').classList.add('on');
+  game.battle.busy = false;
+}
+function buildMoves(){
+  const m = $('#moves-menu');
+  m.innerHTML = '';
+  MOVES.forEach((mv,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn move-btn';
+    btn.textContent = mv.name;
+    btn.addEventListener('click', () => useMove(i));
+    m.appendChild(btn);
   });
+}
+async function useMove(i){
+  const d = game.duel, b = game.battle;
+  if(!d || b.busy || d.capturePhase) return;
+  b.busy = true;
+  $('#moves-menu').classList.remove('on');
+  const mv = MOVES[i];
+  await type($('#battle-text'), `${d.ally.name} utilise ${mv.name} !`);
+  if(mv.heal){
+    sfx.heal();
+    d.allyHP = Math.min(d.allyMax, d.allyHP + mv.heal);
+    updateBars();
+    await wait(700);
+    await type($('#battle-text'), `${d.ally.name} reprend des forces ! GÂTEAUCHU est tout attendri... il en oublie d'attaquer !`);
+    await wait(1400);
+    $('#moves-menu').classList.add('on');
+    b.busy = false;
+    return;
+  }
+  sfx.attack();
+  $('#enemy-wrap').classList.add('hit');
+  await wait(400);
+  $('#enemy-wrap').classList.remove('hit');
+  let dmg = rand(mv.min, mv.max);
+  const crit = mv.crit && Math.random() < mv.crit;
+  if(crit) dmg = Math.floor(dmg * mv.critMul);
+  d.enemyHP = Math.max(0, d.enemyHP - dmg);
+  updateBars();
+  if(crit){ sfx.crit(); await type($('#battle-text'), "Coup critique d'amour !"); await wait(900); }
+  if(d.enemyHP <= 0) return weakenedPhase();
+  await enemyTurn();
+}
+async function enemyTurn(){
+  const d = game.duel, b = game.battle;
+  const mv = ENEMY_MOVES[rand(0, ENEMY_MOVES.length-1)];
+  await type($('#battle-text'), `GÂTEAUCHU utilise ${mv.name} !`);
+  sfx.hurt();
+  $('#ally-wrap').classList.add('hit');
+  await wait(400);
+  $('#ally-wrap').classList.remove('hit');
+  const dmg = rand(mv.min, mv.max);
+  if(d.allyHP - dmg <= 0){
+    d.allyHP = 1;
+    updateBars();
+    await type($('#battle-text'), d.survived
+      ? `${d.ally.name} esquive au dernier moment !`
+      : `${d.ally.name} tient bon ! Il refuse d'abandonner MARIA !`);
+    d.survived = true;
+    await wait(1100);
+  } else {
+    d.allyHP -= dmg;
+    updateBars();
+    await wait(700);
+  }
+  $('#moves-menu').classList.add('on');
+  b.busy = false;
+}
+async function weakenedPhase(){
+  const d = game.duel;
+  d.capturePhase = true;
+  sfx.legend();
+  await type($('#battle-text'), 'GÂTEAUCHU chancelle... ses bougies vacillent !');
+  await wait(1300);
+  await type($('#battle-text'), "NASSIME : C'est le moment, MARIA ! Lance ta POKÉBALL !");
+  await wait(600);
+  $('#battle-menu').classList.add('on');
+  game.battle.busy = false;
 }
 
 /* ══════════════════ FINAL ══════════════════ */
@@ -977,18 +1210,17 @@ function drawCake(){
   const base = spriteCanvas(SPR_CAKE);
   const f = Math.floor(clock/220)%2;
   ctx.drawImage(base, 0, 3);
-  /* flames: candle x positions in sprite = 5,11,18 (col), flame rows 0-1 */
   [[5,0],[11,1],[18,2]].forEach(([cx,i]) => {
     ctx.clearRect(cx-1, 0, 3, 5);
     if(flames[i]){
-      ctx.fillStyle = '#ff8c00'; ctx.fillRect(cx, 3+ (f?0:1), 1, 2);
-      ctx.fillStyle = '#ffd700'; ctx.fillRect(cx - (f?0:0), 2+(f?0:1), 1, 2);
-      ctx.fillRect(cx + (f? -1:1)*0, 1+(f?1:0), 1, 1);
+      ctx.fillStyle = '#ff8c00'; ctx.fillRect(cx, 3+(f?0:1), 1, 2);
+      ctx.fillStyle = '#ffd700'; ctx.fillRect(cx, 2+(f?0:1), 1, 2);
+      ctx.fillRect(cx, 1+(f?1:0), 1, 1);
     }
   });
 }
 function finishGame(){
-  $('#battle').classList.remove('on');
+  $('#battle').classList.remove('on','duel');
   $('#hud').classList.remove('on');
   game.mode = 'final';
   $('#final').classList.add('on');
@@ -1022,6 +1254,7 @@ async function celebrate(){
   $('#blow-hint').style.display = 'none';
   await wait(400);
   $('#final-title').style.display = 'block';
+  $('#age-line').style.display = 'block';
   $('#photo-wrap').style.display = 'block';
   $('#final-msg').style.display = 'block';
   $('#btn-replay').style.display = 'inline-flex';
@@ -1033,8 +1266,8 @@ $('#btn-replay').addEventListener('click', () => location.reload());
 /* ══════════════════ CONFETTI ══════════════════ */
 function confettiGo(){
   const cv = $('#confetti'), ctx = cv.getContext('2d');
-  const rect = cv.parentElement.getBoundingClientRect();
-  cv.width = rect.width; cv.height = rect.height;
+  const rect2 = cv.parentElement.getBoundingClientRect();
+  cv.width = rect2.width; cv.height = rect2.height;
   const colors = ['#ff8fab','#e84876','#ffd700','#8ed86a','#78bcf0','#e8d5f5'];
   const parts = Array.from({length:90}, () => ({
     x: Math.random()*cv.width, y: -20 - Math.random()*cv.height,
