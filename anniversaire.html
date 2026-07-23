@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Pokémon — Édition Anniversaire 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --gb-darkest:#0f380f; --gb-dark:#306230; --gb-light:#8bac0f; --gb-lightest:#9bbc0f;
+  --screen-bg:#c4e86b; --frame:#e8d5f5; --pink:#ff8fab; --rose:#e84876; --gold:#ffd700;
+}
+html, body {
+  width:100%; height:100%; overflow:hidden;
+  font-family:'Press Start 2P', monospace;
+  background:linear-gradient(160deg,#2d1b4e,#1a1030);
+  -webkit-tap-highlight-color:transparent; user-select:none; touch-action:manipulation;
+}
+#game {
+  position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+#console {
+  width:min(100vw, 62vh, 480px); aspect-ratio:10/16; max-height:98vh;
+  background:linear-gradient(145deg,#ffb3c6,#ff8fab);
+  border-radius:18px 18px 60px 18px; padding:4.5% 5% 0 5%;
+  box-shadow:0 20px 60px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.4);
+  display:flex; flex-direction:column;
+}
+#screen-frame {
+  background:#3a2a4a; border-radius:12px 12px 34px 12px; padding:6% 7% 8% 7%;
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.6);
+}
+#screen {
+  position:relative; width:100%; aspect-ratio:10/11;
+  background:var(--screen-bg); border-radius:6px; overflow:hidden;
+  box-shadow:inset 0 0 20px rgba(15,56,15,.25);
+}
+#brand {
+  text-align:center; color:#fff; font-size:clamp(8px,2.2vw,11px);
+  margin-top:5%; text-shadow:1px 1px 0 var(--rose); letter-spacing:1px; flex:1;
+}
+#brand small { display:block; margin-top:6px; font-size:.7em; opacity:.85; }
+
+/* ═══ screens ═══ */
+.scene { position:absolute; inset:0; display:none; flex-direction:column; }
+.scene.on { display:flex; }
+
+/* ═══ title ═══ */
+#title { align-items:center; justify-content:center; text-align:center; gap:14px; padding:12px; cursor:pointer; }
+#title h1 { color:var(--gb-darkest); font-size:clamp(14px,4.5vw,22px); line-height:1.5; text-shadow:2px 2px 0 var(--gb-light); }
+#title .sub { color:var(--rose); font-size:clamp(9px,2.6vw,13px); }
+#title .cake { font-size:clamp(40px,12vw,64px); animation:bounce 1.2s ease-in-out infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+#title .press { color:var(--gb-dark); font-size:clamp(7px,2vw,10px); animation:blink 1s steps(2) infinite; }
+@keyframes blink { 50%{opacity:0} }
+
+/* ═══ field ═══ */
+#field { padding:6px; }
+#hud {
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--gb-darkest); color:var(--screen-bg); border-radius:4px;
+  padding:7px 9px; font-size:clamp(7px,2vw,10px); margin-bottom:6px;
+}
+#hud .balls { letter-spacing:2px; }
+#grass {
+  flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:5px;
+}
+.tile {
+  position:relative; border-radius:5px; background:var(--gb-light);
+  display:flex; align-items:center; justify-content:center;
+  font-size:clamp(16px,6vw,28px); cursor:pointer;
+  box-shadow:inset 0 -3px 0 rgba(15,56,15,.35);
+  transition:transform .1s;
+}
+.tile:active { transform:scale(.93); }
+.tile.rustle { animation:rustle .45s ease-in-out; }
+@keyframes rustle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-7deg) scale(1.06)} 75%{transform:rotate(7deg) scale(1.06)} }
+.tile.empty { background:var(--screen-bg); box-shadow:none; opacity:.55; cursor:default; }
+#trainer { position:absolute; font-size:1.05em; pointer-events:none; filter:drop-shadow(1px 2px 0 rgba(15,56,15,.4)); z-index:2; transition:left .28s ease, top .28s ease; }
+
+/* ═══ battle ═══ */
+#battle { padding:8px; }
+#battle-arena { flex:1; position:relative; }
+#enemy-wrap { position:absolute; top:4%; right:6%; text-align:center; }
+#enemy-sprite {
+  width:clamp(70px,26vw,120px); height:auto; image-rendering:pixelated;
+  filter:drop-shadow(2px 4px 0 rgba(15,56,15,.3));
+  animation:idle 1.6s ease-in-out infinite;
+}
+#enemy-emoji { font-size:clamp(48px,18vw,84px); line-height:1; display:none; animation:idle 1.6s ease-in-out infinite; filter:drop-shadow(2px 4px 0 rgba(15,56,15,.3)); }
+@keyframes idle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+#enemy-wrap.hit { animation:hit .35s; }
+@keyframes hit { 0%,100%{transform:translateX(0)} 30%{transform:translateX(-8px)} 60%{transform:translateX(8px)} }
+#enemy-wrap.caught-anim { animation:suck .5s forwards; }
+@keyframes suck { to { transform:scale(0) rotate(360deg); opacity:0; } }
+#enemy-name {
+  position:absolute; top:6%; left:5%; background:var(--gb-darkest); color:var(--screen-bg);
+  padding:6px 8px; border-radius:4px; font-size:clamp(7px,2vw,10px); max-width:52%;
+}
+#ball {
+  position:absolute; font-size:clamp(22px,8vw,36px); bottom:8%; left:10%;
+  opacity:0; pointer-events:none; z-index:3;
+}
+#ball.throw { animation:throwBall .7s ease-in forwards; }
+@keyframes throwBall {
+  0% { opacity:1; bottom:8%; left:10%; transform:rotate(0); }
+  100% { opacity:1; bottom:52%; left:62%; transform:rotate(720deg); }
+}
+#ball.wobble { opacity:1; bottom:52%; left:62%; animation:wobble .5s ease-in-out 3; }
+@keyframes wobble { 0%,100%{transform:rotate(0)} 30%{transform:rotate(-25deg)} 70%{transform:rotate(25deg)} }
+#ball.rest { opacity:1; bottom:52%; left:62%; }
+#ball.pop { animation:popBall .3s forwards; }
+@keyframes popBall { to { transform:scale(1.8); opacity:0; } }
+
+/* ═══ dialogue + menu ═══ */
+#dialog-box, #intro { }
+.dbox {
+  background:var(--screen-bg); border:3px solid var(--gb-darkest); border-radius:6px;
+  color:var(--gb-darkest); padding:10px; font-size:clamp(8px,2.4vw,11px);
+  line-height:1.7; min-height:5.2em; position:relative;
+}
+.dbox .arrow { position:absolute; right:8px; bottom:4px; animation:blink 1s steps(2) infinite; font-size:.9em; }
+#menu { display:none; gap:6px; margin-top:6px; }
+#menu.on { display:flex; }
+.btn {
+  flex:1; font-family:inherit; font-size:clamp(7px,2.1vw,10px);
+  background:var(--gb-darkest); color:var(--screen-bg); border:none;
+  border-radius:5px; padding:11px 6px; cursor:pointer;
+  box-shadow:0 3px 0 rgba(15,56,15,.5);
+}
+.btn:active { transform:translateY(2px); box-shadow:none; }
+.btn.pink { background:var(--rose); color:#fff; box-shadow:0 3px 0 #a12a4e; }
+
+/* ═══ intro ═══ */
+#intro { align-items:center; justify-content:flex-end; padding:8px; cursor:pointer; }
+#prof { font-size:clamp(48px,16vw,80px); margin-bottom:auto; margin-top:14%; animation:idle 2s ease-in-out infinite; }
+
+/* ═══ legendary flash ═══ */
+#screen.flash { animation:flash .12s 6; }
+@keyframes flash { 50% { filter:invert(1); } }
+#screen.quake { animation:quake .08s 10; }
+@keyframes quake { 25%{transform:translate(-3px,2px)} 75%{transform:translate(3px,-2px)} }
+
+/* ═══ final ═══ */
+#final { align-items:center; text-align:center; padding:10px; overflow-y:auto; background:linear-gradient(180deg,#ffe4ec,#fff5f7); }
+#final h2 { color:var(--rose); font-size:clamp(12px,4vw,18px); line-height:1.6; margin:10px 0 4px; }
+#final .msg { color:#7a3b5e; font-size:clamp(7px,2.2vw,10px); line-height:1.9; margin:8px 4px; }
+#cake-final { position:relative; font-size:clamp(56px,20vw,96px); line-height:1; margin-top:8px; }
+.candle {
+  position:absolute; top:-14%; width:.14em; height:.3em; background:#fff0f5; border-radius:2px;
+  cursor:pointer; box-shadow:0 0 0 1px rgba(232,72,118,.35);
+}
+.candle::before {
+  content:''; position:absolute; top:-.16em; left:50%; transform:translateX(-50%);
+  width:.12em; height:.16em; border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%, var(--gold), #ff8c00);
+  animation:flame .3s ease-in-out infinite alternate;
+}
+@keyframes flame { from{transform:translateX(-50%) scale(1)} to{transform:translateX(-58%) scale(1.15)} }
+.candle.out::before { display:none; }
+.candle.out { animation:candleFade 1.6s ease .8s forwards; }
+@keyframes candleFade { to { opacity:0; } }
+.candle.out::after {
+  content:''; position:absolute; top:-.14em; left:50%; width:.06em; height:.12em;
+  background:rgba(120,120,120,.5); border-radius:50%; animation:smoke 1.4s ease-out forwards;
+}
+@keyframes smoke { to { transform:translateY(-14px); opacity:0; } }
+#blow-hint { color:var(--rose); font-size:clamp(7px,2vw,9px); margin-top:12px; animation:blink 1.4s steps(2) infinite; }
+#pokedex-row { display:flex; gap:4px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+#pokedex-row img { width:clamp(28px,9vw,44px); image-rendering:pixelated; }
+#photo-wrap { display:none; margin:10px auto 6px; }
+#photo-wrap img {
+  width:min(60%,180px); border-radius:10px; border:4px solid #fff;
+  box-shadow:0 6px 18px rgba(232,72,118,.35); transform:rotate(-2deg);
+}
+#confetti { position:absolute; inset:0; pointer-events:none; z-index:5; }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="console">
+    <div id="screen-frame">
+      <div id="screen">
+        <canvas id="confetti"></canvas>
+
+        <div class="scene on" id="title">
+          <div class="cake">🎂</div>
+          <h1>POKÉMON</h1>
+          <div class="sub">Édition Anniversaire<br>de Maria</div>
+          <div class="press">▶ APPUIE POUR JOUER ◀</div>
+        </div>
+
+        <div class="scene" id="intro">
+          <div id="prof">👴🏻</div>
+          <div class="dbox" style="width:100%"><span id="intro-text"></span><span class="arrow">▼</span></div>
+        </div>
+
+        <div class="scene" id="field">
+          <div id="hud"><span id="dex-count">DEX 0/6</span><span class="balls" id="ball-count">●●●●●</span></div>
+          <div id="grass"></div>
+          <div style="margin-top:6px" class="dbox" id="field-text">Tape sur les hautes herbes pour chercher des Pokémon !</div>
+        </div>
+
+        <div class="scene" id="battle">
+          <div id="battle-arena">
+            <div id="enemy-name">???</div>
+            <div id="enemy-wrap">
+              <img id="enemy-sprite" alt="">
+              <div id="enemy-emoji"></div>
+            </div>
+            <div id="ball">⬤</div>
+          </div>
+          <div class="dbox"><span id="battle-text"></span><span class="arrow" id="battle-arrow" style="display:none">▼</span></div>
+          <div id="menu">
+            <button class="btn pink" id="btn-ball">🔴 POKÉBALL</button>
+            <button class="btn" id="btn-run">FUIR</button>
+          </div>
+        </div>
+
+        <div class="scene" id="final">
+          <div id="cake-final">🎂
+            <div class="candle" style="left:18%"></div>
+            <div class="candle" style="left:47%"></div>
+            <div class="candle" style="left:76%"></div>
+          </div>
+          <div id="blow-hint">🕯️ Tape sur les bougies pour les souffler !</div>
+          <h2 id="final-title" style="display:none">JOYEUX<br>ANNIVERSAIRE<br>MARIA ! 🎉</h2>
+          <div id="photo-wrap"><img src="photo.jpg" alt="Nous deux ❤️"></div>
+          <div class="msg" id="final-msg" style="display:none">
+            Tu as capturé tous les Pokémon…<br>
+            mais c'est toi la plus rare<br>et la plus précieuse. ✨<br><br>
+            Je te souhaite une année<br>remplie de rires, d'aventures<br>et d'amour.<br><br>
+            Je t'aime. ❤️
+          </div>
+          <div id="pokedex-row"></div>
+          <button class="btn pink" id="btn-replay" style="display:none; flex:none; margin:12px 0">↻ REJOUER</button>
+        </div>
+
+      </div>
+    </div>
+    <div id="brand">GIRLFRIEND BOY<small>💝 pour Maria 💝</small></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const scenes = ['title','intro','field','battle','final'];
+function show(name){ scenes.forEach(s => $('#'+s).classList.toggle('on', s===name)); }
+
+/* ─── mini chiptune audio ─── */
+let AC = null;
+function audio(){ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume(); return AC; }
+function note(freq, t0, dur, vol=0.12, type='square'){
+  const ctx = audio(), o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, ctx.currentTime + t0);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t0 + dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(ctx.currentTime + t0); o.stop(ctx.currentTime + t0 + dur + 0.05);
+}
+const N = {C4:262,D4:294,E4:330,F4:349,G4:392,A4:440,B4:494,C5:523,D5:587,E5:659,F5:698,G5:784,A5:880};
+function sfxSelect(){ note(N.C5,0,.08); note(N.G5,.08,.12); }
+function sfxRustle(){ note(180,0,.06,.08,'triangle'); note(150,.07,.06,.08,'triangle'); }
+function sfxEncounter(){ [N.E5,N.C5,N.G4,N.C5,N.E5,N.G5].forEach((f,i)=>note(f,i*.07,.09)); }
+function sfxThrow(){ note(N.A4,0,.07); note(N.C5,.07,.07); note(N.E5,.14,.1); }
+function sfxWobble(){ note(N.G4,0,.09,.1,'triangle'); }
+function sfxBreak(){ note(N.C5,0,.1); note(N.F4,.1,.2,.12,'sawtooth'); }
+function sfxCatch(){ [N.C5,N.E5,N.G5,N.C5,N.E5,N.G5,880*1.19].forEach((f,i)=>note(f,i*.09,.12)); }
+function sfxLegend(){ [N.C4,N.E4,N.G4,N.C5,N.E5,N.G5].forEach((f,i)=>{ note(f,i*.12,.3,.1,'sawtooth'); }); }
+function happyBirthday(){
+  const seq = [
+    [N.G4,.5],[N.G4,.25],[N.A4,.75],[N.G4,.75],[N.C5,.75],[N.B4,1.4],
+    [N.G4,.5],[N.G4,.25],[N.A4,.75],[N.G4,.75],[N.D5,.75],[N.C5,1.4],
+    [N.G4,.5],[N.G4,.25],[N.G5,.75],[N.E5,.75],[N.C5,.75],[N.B4,.75],[N.A4,1.4],
+    [N.F5,.5],[N.F5,.25],[N.E5,.75],[N.C5,.75],[N.D5,.75],[N.C5,1.6],
+  ];
+  let t = 0;
+  seq.forEach(([f,d]) => { note(f,t,d*.42,.1); note(f/2,t,d*.42,.05,'triangle'); t += d*.45; });
+}
+
+/* ─── data ─── */
+const SPRITE = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+const POKEMON = [
+  { id:25,  name:'PIKACHU',   emoji:'⚡', msg:"PIKACHU te souhaite une année pleine d'étincelles ! ⚡" },
+  { id:133, name:'ÉVOLI',     emoji:'🦊', msg:"ÉVOLI t'offre tout son amour pour ta nouvelle année ! 💕" },
+  { id:39,  name:'RONDOUDOU', emoji:'🎈', msg:"RONDOUDOU chante « joyeux anniversaire » rien que pour toi ! 🎶" },
+  { id:4,   name:'SALAMÈCHE', emoji:'🔥', msg:"SALAMÈCHE allumera les bougies de ton gâteau ! 🔥" },
+  { id:7,   name:'CARAPUCE',  emoji:'💧', msg:"CARAPUCE te souhaite que tous tes vœux coulent de source ! 💧" },
+  { id:1,   name:'BULBIZARRE',emoji:'🌱', msg:"BULBIZARRE fait pousser un bouquet de fleurs pour ta fête ! 🌸" },
+];
+const LEGENDARY = { id:null, name:'GÂTEAUCHU', emoji:'🎂', msg:'' };
+const GOAL = POKEMON.length;
+
+let state = { caught:[], misses:0, current:null, throws:0, busy:false, legendary:false };
+
+/* ─── typewriter ─── */
+let typing = null, skipTyping = null;
+function type(el, text){
+  return new Promise(res => {
+    clearInterval(typing); el.textContent = '';
+    let i = 0;
+    const done = () => { clearInterval(typing); skipTyping = null; el.textContent = text; res(); };
+    skipTyping = done;
+    typing = setInterval(() => {
+      el.textContent = text.slice(0, ++i);
+      if(i >= text.length) done();
+    }, 28);
+  });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* ─── title ─── */
+$('#title').addEventListener('click', async () => {
+  audio(); sfxSelect();
+  show('intro'); runIntro();
+});
+
+/* ─── intro ─── */
+const INTRO = [
+  "Bonjour MARIA ! Bienvenue dans le monde des POKÉMON !",
+  "Aujourd'hui n'est pas un jour comme les autres...",
+  "La légende raconte qu'un POKÉMON très rare apparaît une fois par an, le jour de TON anniversaire !",
+  "Capture 6 POKÉMON dans les hautes herbes pour le faire sortir de sa cachette...",
+  "Bonne chance, championne ! C'est parti !",
+];
+let introStep = 0, introBusy = false;
+async function runIntro(){
+  introBusy = true;
+  await type($('#intro-text'), INTRO[introStep]);
+  introBusy = false;
+}
+$('#intro').addEventListener('click', () => {
+  if(introBusy){ if(skipTyping) skipTyping(); return; }
+  sfxSelect();
+  introStep++;
+  if(introStep >= INTRO.length){ startField(); } else { runIntro(); }
+});
+
+/* ─── field ─── */
+const GRID_COLS = 4, GRID_ROWS = 5;
+function startField(){
+  show('field');
+  const grass = $('#grass');
+  if(!grass.children.length){
+    for(let i=0;i<GRID_COLS*GRID_ROWS;i++){
+      const t = document.createElement('div');
+      t.className = 'tile'; t.textContent = '🌿'; t.dataset.i = i;
+      t.addEventListener('click', () => searchTile(t));
+      grass.appendChild(t);
+    }
+    const trainer = document.createElement('div');
+    trainer.id = 'trainer'; trainer.textContent = '👧🏻';
+    grass.appendChild(trainer);
+    positionTrainer(grass.children[Math.floor(GRID_COLS*GRID_ROWS/2)]);
+  }
+  updateHud();
+}
+function positionTrainer(tile){
+  const trainer = $('#trainer'), g = $('#grass');
+  const r = tile.getBoundingClientRect(), gr = g.getBoundingClientRect();
+  trainer.style.left = (r.left - gr.left + r.width*0.22) + 'px';
+  trainer.style.top  = (r.top  - gr.top  + r.height*0.12) + 'px';
+}
+function updateHud(){
+  $('#dex-count').textContent = `DEX ${state.caught.length}/${GOAL}`;
+}
+async function searchTile(tile){
+  if(state.busy || tile.classList.contains('empty')) return;
+  state.busy = true;
+  positionTrainer(tile);
+  await wait(300);
+  sfxRustle();
+  tile.classList.add('rustle');
+  await wait(500);
+  tile.classList.remove('rustle');
+
+  const remaining = POKEMON.filter(p => !state.caught.includes(p.id));
+  const encounter = state.misses >= 1 || Math.random() < 0.65;
+  if(!encounter || !remaining.length){
+    state.misses++;
+    $('#field-text').textContent = ['Rien ici... 🍃','Juste du vent...','Un papillon s\'envole... 🦋'][Math.floor(Math.random()*3)];
+    state.busy = false;
+    return;
+  }
+  state.misses = 0;
+  startBattle(remaining[Math.floor(Math.random()*remaining.length)], false);
+}
+
+/* ─── battle ─── */
+async function startBattle(pkm, legendary){
+  state.current = pkm; state.throws = 0; state.legendary = legendary;
+  sfxEncounter();
+  $('#screen').classList.add('flash');
+  await wait(700);
+  $('#screen').classList.remove('flash');
+  show('battle');
+  $('#menu').classList.remove('on');
+  $('#battle-arrow').style.display = 'none';
+  $('#ball').className = '';
+
+  const img = $('#enemy-sprite'), emo = $('#enemy-emoji');
+  img.style.display = 'none'; emo.style.display = 'block'; emo.textContent = pkm.emoji;
+  if(pkm.id){
+    img.onload = () => { img.style.display = 'inline'; emo.style.display = 'none'; };
+    img.onerror = null;
+    img.src = SPRITE(pkm.id);
+  }
+  $('#enemy-wrap').className = '';
+  $('#enemy-name').textContent = pkm.name + (legendary ? ' ✦' : '');
+
+  await type($('#battle-text'), legendary
+    ? `Le POKÉMON légendaire GÂTEAUCHU apparaît ! Il sent bon le sucre... ✨`
+    : `Un ${pkm.name} sauvage apparaît !`);
+  $('#menu').classList.add('on');
+  state.busy = false;
+}
+
+$('#btn-ball').addEventListener('click', throwBall);
+$('#btn-run').addEventListener('click', async () => {
+  if(state.busy) return;
+  if(state.legendary){
+    await type($('#battle-text'), "Impossible de fuir ! GÂTEAUCHU veut fêter ton anniversaire !");
+    return;
+  }
+  sfxSelect();
+  await type($('#battle-text'), 'Tu prends la fuite... à la prochaine !');
+  await wait(600);
+  backToField('Le ' + state.current.name + " s'est échappé dans les herbes...");
+});
+
+async function throwBall(){
+  if(state.busy) return;
+  state.busy = true;
+  $('#menu').classList.remove('on');
+  state.throws++;
+
+  const ball = $('#ball');
+  await type($('#battle-text'), 'MARIA lance une POKÉBALL !');
+  sfxThrow();
+  ball.textContent = '🔴';
+  ball.className = 'throw';
+  await wait(700);
+  $('#enemy-wrap').classList.add('caught-anim');
+  await wait(500);
+  ball.className = 'wobble';
+  for(let i=0;i<3;i++){ sfxWobble(); await wait(500); }
+  ball.className = 'rest';
+
+  const caught = state.legendary ? state.throws >= 3 : (state.throws >= 2 || Math.random() < 0.7);
+  if(caught){
+    sfxCatch();
+    await type($('#battle-text'), `Et hop ! ${state.current.name} est capturé ! 🎉`);
+    await wait(900);
+    if(state.legendary){ finishGame(); return; }
+    state.caught.push(state.current.id);
+    await type($('#battle-text'), state.current.msg);
+    await wait(2200);
+    if(state.caught.length >= GOAL){ legendaryTime(); }
+    else backToField(`Encore ${GOAL - state.caught.length} POKÉMON avant la surprise...`);
+  } else {
+    sfxBreak();
+    ball.className = 'pop';
+    $('#enemy-wrap').classList.remove('caught-anim');
+    $('#enemy-wrap').classList.add('hit');
+    await type($('#battle-text'), state.legendary
+      ? (state.throws === 1 ? 'Oh non ! GÂTEAUCHU résiste ! Il est coriace ce gâteau !' : 'Presque ! Encore un effort, il faiblit... ses bougies tremblent !')
+      : `Mince ! ${state.current.name} s'est libéré ! Réessaie !`);
+    $('#enemy-wrap').classList.remove('hit');
+    $('#menu').classList.add('on');
+    state.busy = false;
+  }
+}
+
+function backToField(msg){
+  show('field');
+  $('#field-text').textContent = msg;
+  updateHud();
+  state.busy = false;
+}
+
+/* ─── legendary ─── */
+async function legendaryTime(){
+  show('field');
+  updateHud();
+  const ft = $('#field-text');
+  ft.textContent = '...';
+  await wait(600);
+  ft.textContent = 'Le sol se met à trembler !!';
+  sfxLegend();
+  $('#screen').classList.add('quake');
+  await wait(900);
+  $('#screen').classList.remove('quake');
+  ft.textContent = 'Une délicieuse odeur de gâteau envahit les herbes... 🍰';
+  await wait(1800);
+  startBattle(LEGENDARY, true);
+}
+
+/* ─── final ─── */
+function finishGame(){
+  show('final');
+  const row = $('#pokedex-row');
+  row.innerHTML = '';
+  POKEMON.forEach(p => {
+    const im = document.createElement('img');
+    im.alt = p.name; im.title = p.name;
+    im.onerror = () => {
+      const span = document.createElement('span');
+      span.textContent = p.emoji; span.style.fontSize = 'clamp(20px,7vw,32px)';
+      im.replaceWith(span);
+    };
+    im.src = SPRITE(p.id); row.appendChild(im);
+  });
+  const cake = document.createElement('span');
+  cake.textContent = '🎂'; cake.style.fontSize = 'clamp(28px,9vw,44px)';
+  row.appendChild(cake);
+}
+let blown = 0;
+document.querySelectorAll('.candle').forEach(c => {
+  c.addEventListener('click', () => {
+    if(c.classList.contains('out')) return;
+    c.classList.add('out');
+    note(N.C4,0,.15,.1,'triangle');
+    if(++blown >= 3) celebrate();
+  });
+});
+async function celebrate(){
+  $('#blow-hint').style.display = 'none';
+  await wait(400);
+  $('#final-title').style.display = 'block';
+  $('#photo-wrap').style.display = 'block';
+  $('#final-msg').style.display = 'block';
+  $('#btn-replay').style.display = 'inline-block';
+  happyBirthday();
+  confettiGo();
+}
+$('#btn-replay').addEventListener('click', () => location.reload());
+
+/* ─── confetti ─── */
+function confettiGo(){
+  const cv = $('#confetti'), ctx = cv.getContext('2d');
+  const rect = cv.parentElement.getBoundingClientRect();
+  cv.width = rect.width; cv.height = rect.height;
+  const colors = ['#ff8fab','#e84876','#ffd700','#8bac0f','#7ec8e3','#e8d5f5'];
+  const parts = Array.from({length:90}, () => ({
+    x: Math.random()*cv.width, y: -20 - Math.random()*cv.height,
+    w: 4+Math.random()*5, h: 6+Math.random()*6,
+    vy: 1+Math.random()*2.2, vx: -1+Math.random()*2,
+    rot: Math.random()*Math.PI, vr: -0.1+Math.random()*0.2,
+    c: colors[Math.floor(Math.random()*colors.length)],
+  }));
+  let frames = 0;
+  (function loop(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    parts.forEach(p => {
+      p.y += p.vy; p.x += p.vx + Math.sin(p.y/30); p.rot += p.vr;
+      if(p.y > cv.height + 20){ p.y = -20; p.x = Math.random()*cv.width; }
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    if(++frames < 60*25) requestAnimationFrame(loop);
+    else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+</script>
+</body>
+</html>
