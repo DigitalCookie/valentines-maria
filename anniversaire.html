@@ -331,13 +331,59 @@ function happyBirthday(){
   seq.forEach(([f,d]) => { note(f,t,d*.42,.1); note(f/2,t,d*.42,.05,'triangle'); t += d*.45; });
 }
 
+/* ══════════════════ MUSIQUE DE FOND ══════════════════ */
+const C3=131, D3=147, E3=165, F3=175, G3=196, A3=220, B3=247;
+const THEMES = {
+  world: { beat:.22, mel:[
+    [N.C5,1],[N.E5,1],[N.G5,1],[N.E5,1], [N.D5,1],[N.F5,1],[N.A5,1],[N.F5,1],
+    [N.E5,1],[N.G5,1],[N.B4,1],[N.G5,1], [N.C6,1],[N.G5,1],[N.E5,1],[0,1],
+    [N.C5,1],[N.E5,1],[N.G5,1],[N.E5,1], [N.D5,1],[N.F5,1],[N.A5,1],[N.F5,1],
+    [N.G5,1],[N.F5,1],[N.D5,1],[N.B4,1], [N.C5,3],[0,1],
+  ], bass:[C3,F3,G3,C3,C3,F3,G3,C3] },
+  battle: { beat:.15, mel:[
+    [N.A4,1],[N.C5,1],[N.E5,1],[N.C5,1], [N.A4,1],[N.C5,1],[N.E5,1],[N.G5,1],
+    [N.F5,1],[N.C5,1],[N.A4,1],[N.C5,1], [N.G4,1],[N.B4,1],[N.D5,1],[N.B4,1],
+  ], bass:[A3,A3,F3,G3] },
+};
+const BGM = { current:null, nextAt:0 };
+function scheduleTheme(name, when){
+  const th = THEMES[name], now = AC.currentTime;
+  let t = 0;
+  th.mel.forEach(([f,beats]) => {
+    if(f) note(f, when - now + t, beats*th.beat*.85, .032);
+    t += beats*th.beat;
+  });
+  const barLen = t / th.bass.length;
+  th.bass.forEach((f,bi) => {
+    note(f, when - now + bi*barLen, th.beat*2.2, .028, 'triangle');
+    note(f, when - now + bi*barLen + barLen/2, th.beat*1.6, .02, 'triangle');
+  });
+  return t;
+}
+setInterval(() => {
+  if(!AC || AC.state !== 'running') return;
+  let want = null;
+  if(['intro','world','dialog'].includes(game.mode)) want = 'world';
+  else if(game.mode === 'battle') want = 'battle';
+  if(want !== BGM.current){ BGM.current = want; BGM.nextAt = AC.currentTime + .05; }
+  if(BGM.current && AC.currentTime >= BGM.nextAt - .12){
+    BGM.nextAt = Math.max(BGM.nextAt, AC.currentTime) ;
+    BGM.nextAt += scheduleTheme(BGM.current, BGM.nextAt);
+  }
+}, 100);
+
+/* ══════════════════ CHATONS ══════════════════ */
+const kittenSfx = new Audio('wiwiwi-kitten.mp3');
+kittenSfx.volume = 0.9;
+function meow(){ try { kittenSfx.currentTime = 0; kittenSfx.play().catch(()=>{}); } catch(e){} }
+
 /* ══════════════════ PIXEL SPRITES ══════════════════ */
 const PAL = {
   k:'#1a2818', h:'#6b4226', H:'#8a5a3a', s:'#f8c8a0', e:'#241a10',
   p:'#e84876', P:'#ff8fab', d:'#3a5a8a', b:'#4a3020',
   g:'#e8e8e8', w:'#ffffff', v:'#3a8a8a',
   r:'#d83048', W:'#fffef8', l:'#cfd8e8', c:'#fff0f5', o:'#ff8c00', y:'#ffd700',
-  m:'#f4a8c0', M:'#e84876',
+  m:'#f4a8c0', M:'#e84876', n:'#2c2218',
 };
 function spriteCanvas(rows, scale=1){
   const h = rows.length, w = Math.max(...rows.map(r=>r.length));
@@ -421,19 +467,19 @@ const SPR_SIDE_B = SPR_SIDE_A.slice(0,11).concat([
 '.kss...ssk..',
 '.kbb...bbk..',
 ]);
-/* Professeur Nassime — portrait 14x17 : cheveux longs bruns + moustache */
+/* Professeur Nassime — portrait 14x17 : cheveux courts noirs + moustache */
 const SPR_PROF = [
 '....kkkkkk....',
-'...khhhhhhk...',
-'..khhhhhhhhk..',
-'..khhhhhhhhk..',
-'..khhssssshk..',
-'..khsesseshk..',
-'..khsbbbbshk..',
-'..khhsssshhk..',
-'..khwwwwwwhk..',
-'.khhwvvvvwhhk.',
-'.khhwvvvvwhhk.',
+'...knnnnnnk...',
+'..knnnnnnnnk..',
+'..knnnnnnnnk..',
+'..knssssssnk..',
+'..knsessesnk..',
+'..kssbbbbssk..',
+'..kssssssssk..',
+'..kwwwwwwwwk..',
+'.kwwwvvvvwwwk.',
+'.kwwwvvvvwwwk.',
 '..kswwwwwwsk..',
 '..kwwwwwwwwk..',
 '..kwwwwwwwwk..',
@@ -444,14 +490,14 @@ const SPR_PROF = [
 /* Nassime overworld 12x14 */
 const SPR_NPC = [
 '...kkkkkk...',
-'..khhhhhhk..',
-'.khhhhhhhhk.',
-'.khhsssshhk.',
-'.khsessehk..',
-'.khsbbbshk..',
-'.khhssshhk..',
-'.khwwwwwwhk.',
-'.khwvvvvwhk.',
+'..knnnnnnk..',
+'.knnnnnnnnk.',
+'.knssssssnk.',
+'.knsessesnk.',
+'.kssbbbssk..',
+'..kssssssk..',
+'.kwwwwwwwwk.',
+'.kwwvvvvwwk.',
 '.kswwwwwwsk.',
 '..kwwwwwwk..',
 '..kdd..ddk..',
@@ -1027,6 +1073,7 @@ async function throwBall(){
   const ball = $('#ball');
   await type($('#battle-text'), 'MARIA lance une POKÉBALL !');
   sfx.throw();
+  meow();
   ball.className = 'throw';
   await wait(700);
   $('#enemy-wrap').classList.add('caught-anim');
